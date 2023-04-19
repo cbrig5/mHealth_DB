@@ -2,10 +2,10 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:8889
--- Generation Time: Apr 19, 2023 at 03:11 AM
--- Server version: 5.7.39
--- PHP Version: 7.4.33
+-- Host: 127.0.0.1:3306
+-- Generation Time: Apr 19, 2023 at 05:30 AM
+-- Server version: 8.0.31
+-- PHP Version: 8.0.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,13 +27,17 @@ SET time_zone = "+00:00";
 -- Table structure for table `appointment`
 --
 
-CREATE TABLE `appointment` (
-  `appointment_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
-  `doctor_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `appointment`;
+CREATE TABLE IF NOT EXISTS `appointment` (
+  `appointment_id` int NOT NULL,
+  `patient_id` int DEFAULT NULL,
+  `doctor_id` int DEFAULT NULL,
   `start_time` datetime DEFAULT NULL,
-  `end_time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`appointment_id`),
+  KEY `patient_id` (`patient_id`),
+  KEY `doctor_id` (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -41,11 +45,14 @@ CREATE TABLE `appointment` (
 -- Table structure for table `availability`
 --
 
-CREATE TABLE `availability` (
-  `availability_id` int(11) NOT NULL,
-  `doctor_id` int(11) DEFAULT NULL,
-  `available` varchar(30) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `availability`;
+CREATE TABLE IF NOT EXISTS `availability` (
+  `availability_id` int NOT NULL,
+  `doctor_id` int DEFAULT NULL,
+  `available` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`availability_id`),
+  KEY `doctor_id` (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -53,9 +60,11 @@ CREATE TABLE `availability` (
 -- Table structure for table `doctor`
 --
 
-CREATE TABLE `doctor` (
-  `doctor_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `doctor`;
+CREATE TABLE IF NOT EXISTS `doctor` (
+  `doctor_id` int NOT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -63,10 +72,12 @@ CREATE TABLE `doctor` (
 -- Table structure for table `email`
 --
 
-CREATE TABLE `email` (
-  `person_id` int(11) NOT NULL,
-  `email` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `email`;
+CREATE TABLE IF NOT EXISTS `email` (
+  `person_id` int NOT NULL,
+  `email` varchar(50) NOT NULL,
+  PRIMARY KEY (`person_id`,`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -74,12 +85,14 @@ CREATE TABLE `email` (
 -- Table structure for table `employee`
 --
 
-CREATE TABLE `employee` (
-  `employee_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `employee`;
+CREATE TABLE IF NOT EXISTS `employee` (
+  `employee_id` int NOT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `job_title` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `job_title` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -87,12 +100,15 @@ CREATE TABLE `employee` (
 -- Table structure for table `immunization`
 --
 
-CREATE TABLE `immunization` (
-  `immunization_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `immunization`;
+CREATE TABLE IF NOT EXISTS `immunization` (
+  `immunization_id` int NOT NULL,
+  `patient_id` int DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
-  `date_given` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `date_given` date DEFAULT NULL,
+  PRIMARY KEY (`immunization_id`),
+  KEY `patient_id` (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -100,13 +116,16 @@ CREATE TABLE `immunization` (
 -- Table structure for table `insurance`
 --
 
-CREATE TABLE `insurance` (
-  `insurance_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `insurance`;
+CREATE TABLE IF NOT EXISTS `insurance` (
+  `insurance_id` int NOT NULL,
+  `patient_id` int DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `policy_number` varchar(20) DEFAULT NULL,
-  `group_number` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `group_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`insurance_id`),
+  KEY `patient_id` (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -114,12 +133,15 @@ CREATE TABLE `insurance` (
 -- Table structure for table `medication`
 --
 
-CREATE TABLE `medication` (
-  `medication_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `medication`;
+CREATE TABLE IF NOT EXISTS `medication` (
+  `medication_id` int NOT NULL,
+  `patient_id` int DEFAULT NULL,
   `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `end_date` date DEFAULT NULL,
+  PRIMARY KEY (`medication_id`),
+  KEY `patient_id` (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -127,13 +149,17 @@ CREATE TABLE `medication` (
 -- Table structure for table `message`
 --
 
-CREATE TABLE `message` (
-  `message_id` int(11) NOT NULL,
-  `sender_id` int(11) DEFAULT NULL,
-  `receiver_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE IF NOT EXISTS `message` (
+  `message_id` int NOT NULL,
+  `sender_id` int DEFAULT NULL,
+  `receiver_id` int DEFAULT NULL,
   `title` varchar(50) DEFAULT NULL,
-  `body` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `body` text,
+  PRIMARY KEY (`message_id`),
+  KEY `sender_id` (`sender_id`),
+  KEY `receiver_id` (`receiver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -141,10 +167,12 @@ CREATE TABLE `message` (
 -- Table structure for table `patient`
 --
 
-CREATE TABLE `patient` (
-  `patient_id` int(11) NOT NULL,
-  `minor` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `patient`;
+CREATE TABLE IF NOT EXISTS `patient` (
+  `patient_id` int NOT NULL,
+  `minor` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -152,13 +180,22 @@ CREATE TABLE `patient` (
 -- Table structure for table `person`
 --
 
-CREATE TABLE `person` (
-  `person_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `person`;
+CREATE TABLE IF NOT EXISTS `person` (
+  `person_id` int NOT NULL,
   `first_name` varchar(50) DEFAULT NULL,
-  `middle_intial` char(1) DEFAULT NULL,
+  `middle_initial` char(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `last_name` varchar(50) DEFAULT NULL,
-  `birth_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `birth_date` date DEFAULT NULL,
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`person_id`, `first_name`, `middle_initial`, `last_name`, `birth_date`) VALUES
+(0, 'Elijah', 'C', 'Tay', '1998-09-11');
 
 -- --------------------------------------------------------
 
@@ -166,10 +203,12 @@ CREATE TABLE `person` (
 -- Table structure for table `specialty`
 --
 
-CREATE TABLE `specialty` (
-  `doctor_id` int(11) NOT NULL,
-  `specialty` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `specialty`;
+CREATE TABLE IF NOT EXISTS `specialty` (
+  `doctor_id` int NOT NULL,
+  `specialty` varchar(50) NOT NULL,
+  PRIMARY KEY (`doctor_id`,`specialty`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -177,100 +216,12 @@ CREATE TABLE `specialty` (
 -- Table structure for table `telephone`
 --
 
-CREATE TABLE `telephone` (
-  `person_id` int(11) NOT NULL,
-  `telephone` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `appointment`
---
-ALTER TABLE `appointment`
-  ADD PRIMARY KEY (`appointment_id`),
-  ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
-
---
--- Indexes for table `availability`
---
-ALTER TABLE `availability`
-  ADD PRIMARY KEY (`availability_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
-
---
--- Indexes for table `doctor`
---
-ALTER TABLE `doctor`
-  ADD PRIMARY KEY (`doctor_id`);
-
---
--- Indexes for table `email`
---
-ALTER TABLE `email`
-  ADD PRIMARY KEY (`person_id`,`email`);
-
---
--- Indexes for table `employee`
---
-ALTER TABLE `employee`
-  ADD PRIMARY KEY (`employee_id`);
-
---
--- Indexes for table `immunization`
---
-ALTER TABLE `immunization`
-  ADD PRIMARY KEY (`immunization_id`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `insurance`
---
-ALTER TABLE `insurance`
-  ADD PRIMARY KEY (`insurance_id`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `medication`
---
-ALTER TABLE `medication`
-  ADD PRIMARY KEY (`medication_id`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `message`
---
-ALTER TABLE `message`
-  ADD PRIMARY KEY (`message_id`),
-  ADD KEY `sender_id` (`sender_id`),
-  ADD KEY `receiver_id` (`receiver_id`);
-
---
--- Indexes for table `patient`
---
-ALTER TABLE `patient`
-  ADD PRIMARY KEY (`patient_id`);
-
---
--- Indexes for table `person`
---
-ALTER TABLE `person`
-  ADD PRIMARY KEY (`person_id`);
-
---
--- Indexes for table `specialty`
---
-ALTER TABLE `specialty`
-  ADD PRIMARY KEY (`doctor_id`,`specialty`);
-
---
--- Indexes for table `telephone`
---
-ALTER TABLE `telephone`
-  ADD PRIMARY KEY (`person_id`,`telephone`);
+DROP TABLE IF EXISTS `telephone`;
+CREATE TABLE IF NOT EXISTS `telephone` (
+  `person_id` int NOT NULL,
+  `telephone` int NOT NULL,
+  PRIMARY KEY (`person_id`,`telephone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Constraints for dumped tables
