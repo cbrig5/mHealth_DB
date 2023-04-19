@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Apr 19, 2023 at 06:31 PM
+-- Generation Time: Apr 19, 2023 at 07:45 PM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.33
 
@@ -271,6 +271,7 @@ ALTER TABLE `immunization`
 ALTER TABLE `insurance`
   ADD PRIMARY KEY (`insurance_id`),
   ADD UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
+  ADD UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
   ADD KEY `patient_id` (`patient_id`);
 
 --
