@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Apr 17, 2023 at 10:26 PM
+-- Generation Time: Apr 19, 2023 at 03:11 AM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.33
 
@@ -124,6 +124,20 @@ CREATE TABLE `medication` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `message`
+--
+
+CREATE TABLE `message` (
+  `message_id` int(11) NOT NULL,
+  `sender_id` int(11) DEFAULT NULL,
+  `receiver_id` int(11) DEFAULT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `body` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `patient`
 --
 
@@ -227,6 +241,14 @@ ALTER TABLE `medication`
   ADD KEY `patient_id` (`patient_id`);
 
 --
+-- Indexes for table `message`
+--
+ALTER TABLE `message`
+  ADD PRIMARY KEY (`message_id`),
+  ADD KEY `sender_id` (`sender_id`),
+  ADD KEY `receiver_id` (`receiver_id`);
+
+--
 -- Indexes for table `patient`
 --
 ALTER TABLE `patient`
@@ -302,6 +324,13 @@ ALTER TABLE `insurance`
 --
 ALTER TABLE `medication`
   ADD CONSTRAINT `medication_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`);
+
+--
+-- Constraints for table `message`
+--
+ALTER TABLE `message`
+  ADD CONSTRAINT `message_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `employee` (`employee_id`),
+  ADD CONSTRAINT `message_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `patient` (`patient_id`);
 
 --
 -- Constraints for table `patient`
