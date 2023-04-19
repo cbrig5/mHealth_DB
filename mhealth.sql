@@ -179,6 +179,8 @@ ALTER TABLE `appointment`
   ADD PRIMARY KEY (`appointment_id`),
   ADD KEY `patient_id` (`patient_id`),
   ADD KEY `doctor_id` (`doctor_id`);
+  ADD CONSTRAINT `check_times` CHECK (`start_time` <= `end_time`);
+
 
 --
 -- Indexes for table `availability`
