@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Apr 19, 2023 at 05:48 PM
+-- Generation Time: Apr 19, 2023 at 06:31 PM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.33
 
@@ -32,7 +32,8 @@ CREATE TABLE `appointment` (
   `patient_id` int(11) DEFAULT NULL,
   `doctor_id` int(11) DEFAULT NULL,
   `start_time` datetime DEFAULT NULL,
-  `end_time` datetime DEFAULT NULL
+  `end_time` datetime DEFAULT NULL,
+  `location` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -42,9 +43,8 @@ CREATE TABLE `appointment` (
 --
 
 CREATE TABLE `availability` (
-  `availability_id` int(11) NOT NULL,
-  `doctor_id` int(11) DEFAULT NULL,
-  `available` varchar(30) DEFAULT NULL
+  `doctor_id` int(11) NOT NULL,
+  `available` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -118,8 +118,8 @@ CREATE TABLE `insurance` (
   `insurance_id` int(11) NOT NULL,
   `patient_id` int(11) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
-  `policy_number` varchar(20) DEFAULT NULL,
-  `group_number` varchar(20) DEFAULT NULL
+  `policy_number` varchar(20) NOT NULL,
+  `group_number` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -146,7 +146,7 @@ CREATE TABLE `message` (
   `sender_id` int(11) DEFAULT NULL,
   `receiver_id` int(11) DEFAULT NULL,
   `title` varchar(50) DEFAULT NULL,
-  `body` text
+  `body` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -175,10 +175,10 @@ INSERT INTO `patient` (`patient_id`, `minor`) VALUES
 
 CREATE TABLE `person` (
   `person_id` int(11) NOT NULL,
-  `first_name` varchar(50) DEFAULT NULL,
+  `first_name` varchar(50) NOT NULL,
   `middle_intial` char(1) DEFAULT NULL,
-  `last_name` varchar(50) DEFAULT NULL,
-  `birth_date` date DEFAULT NULL
+  `last_name` varchar(50) NOT NULL,
+  `birth_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -237,8 +237,7 @@ ALTER TABLE `appointment`
 -- Indexes for table `availability`
 --
 ALTER TABLE `availability`
-  ADD PRIMARY KEY (`availability_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
+  ADD PRIMARY KEY (`doctor_id`,`available`);
 
 --
 -- Indexes for table `doctor`
@@ -271,6 +270,7 @@ ALTER TABLE `immunization`
 --
 ALTER TABLE `insurance`
   ADD PRIMARY KEY (`insurance_id`),
+  ADD UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
   ADD KEY `patient_id` (`patient_id`);
 
 --
