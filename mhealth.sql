@@ -180,6 +180,7 @@ ALTER TABLE `appointment`
   ADD KEY `patient_id` (`patient_id`),
   ADD KEY `doctor_id` (`doctor_id`);
   ADD CONSTRAINT `check_times` CHECK (`start_time` <= `end_time`);
+  ADD CONSTRAINT `unique_patient_appointment` UNIQUE (patient_id, start_time);
 
 
 --
