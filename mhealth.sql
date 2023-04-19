@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Apr 19, 2023 at 03:11 AM
+-- Generation Time: Apr 19, 2023 at 05:48 PM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.33
 
@@ -57,6 +57,13 @@ CREATE TABLE `doctor` (
   `doctor_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `doctor`
+--
+
+INSERT INTO `doctor` (`doctor_id`) VALUES
+(2);
+
 -- --------------------------------------------------------
 
 --
@@ -80,6 +87,13 @@ CREATE TABLE `employee` (
   `end_date` date DEFAULT NULL,
   `job_title` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `employee`
+--
+
+INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`) VALUES
+(3, '2019-10-10', NULL, 'Secretary');
 
 -- --------------------------------------------------------
 
@@ -146,6 +160,13 @@ CREATE TABLE `patient` (
   `minor` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `patient`
+--
+
+INSERT INTO `patient` (`patient_id`, `minor`) VALUES
+(1, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -159,6 +180,24 @@ CREATE TABLE `person` (
   `last_name` varchar(50) DEFAULT NULL,
   `birth_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`person_id`, `first_name`, `middle_intial`, `last_name`, `birth_date`) VALUES
+(1, 'Elijah', 'C', 'Tay', '1998-09-11'),
+(2, 'Corey', 'J', 'Bright', '2002-11-14'),
+(3, 'Angela', 'K', 'Gagnon', '2001-10-22'),
+(4, 'Hapreet', NULL, 'Bains', '1995-10-21'),
+(5, 'Adesh', NULL, 'Rai', '1993-01-01'),
+(6, 'Hannah', NULL, 'Applebaum', '1995-01-01'),
+(7, 'Faizan', NULL, 'Rafieuddin', '1996-01-01'),
+(8, 'John', NULL, 'Doe', '1990-09-01'),
+(9, 'Bob', NULL, 'Smith', '1985-09-21'),
+(10, 'Alice', NULL, 'Johnson', '1988-11-30'),
+(11, 'Mike', NULL, 'Williams', '1996-03-15'),
+(12, 'Jane', NULL, 'Doe', '1992-05-12');
 
 -- --------------------------------------------------------
 
@@ -211,7 +250,8 @@ ALTER TABLE `doctor`
 -- Indexes for table `email`
 --
 ALTER TABLE `email`
-  ADD PRIMARY KEY (`person_id`,`email`);
+  ADD PRIMARY KEY (`person_id`,`email`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `employee`
@@ -271,6 +311,40 @@ ALTER TABLE `specialty`
 --
 ALTER TABLE `telephone`
   ADD PRIMARY KEY (`person_id`,`telephone`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `immunization`
+--
+ALTER TABLE `immunization`
+  MODIFY `immunization_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `insurance`
+--
+ALTER TABLE `insurance`
+  MODIFY `insurance_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medication`
+--
+ALTER TABLE `medication`
+  MODIFY `medication_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `message`
+--
+ALTER TABLE `message`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `person`
+--
+ALTER TABLE `person`
+  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
