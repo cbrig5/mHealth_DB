@@ -1,8 +1,9 @@
 --Appointment Check Constraints
-
 ALTER TABLE appointment
   ADD CONSTRAINT location_domain CHECK (location IN ("online", "in-person", "Online", "In-person"));
 
-
-ALTER TABLE appointment
-  ADD CONSTRAINT start_time_domain CHECK (start_time IN )
+--Doctor availability 
+ALTER TABLE doctor_availability 
+	ADD CONSTRAINT start_time_domain CHECK (start_time BETWEEN "08:00:00" AND "18:00:00"),
+    ADD CONSTRAINT end_time_domain CHECK(end_time BETWEEN "08:00:00" AND "18:00:00"),
+    ADD CONSTRAINT time_overlap CHECK (end_time > start_time);
