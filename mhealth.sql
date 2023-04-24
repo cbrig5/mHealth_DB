@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 24, 2023 at 07:43 PM
+-- Generation Time: Apr 24, 2023 at 11:55 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -31,7 +31,7 @@ CREATE TABLE `appointment` (
   `appointment_id` int(11) NOT NULL,
   `patient_id` int(11) NOT NULL,
   `doctor_id` int(11) NOT NULL,
-  `date` date NOT NULL,
+  `appointment_date` date NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `location` varchar(10) NOT NULL
@@ -41,19 +41,38 @@ CREATE TABLE `appointment` (
 -- Dumping data for table `appointment`
 --
 
-INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `date`, `start_time`, `end_time`, `location`) VALUES
+INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `appointment_date`, `start_time`, `end_time`, `location`) VALUES
 (1, 1, 2, '2023-01-01', '09:00:00', '10:00:00', 'in-person');
 
 --
 -- Triggers `appointment`
 --
 DELIMITER $$
+CREATE TRIGGER `check_doctor_availability_trigger` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
+    IF NOT EXISTS (
+        SELECT *
+        FROM doctor_availability
+        WHERE doctor_id = NEW.doctor_id
+        AND `availability_date` = NEW.appointment_date
+        AND (
+            (NEW.start_time BETWEEN start_time AND end_time)
+            AND (NEW.end_time BETWEEN start_time AND end_time)
+
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Doctor is not available at the given date and time.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
 CREATE TRIGGER `prevent_double_booking` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
     SELECT COUNT(*) INTO num_appointments
     FROM appointment
     WHERE patient_id = NEW.patient_id
-    AND `date` = NEW.`date`
+    AND `appointment_date` = NEW.`appointment_date`
     AND start_time <= NEW.end_time
     AND end_time >= NEW.start_time;
     IF num_appointments > 0 THEN
@@ -94,6 +113,13 @@ CREATE TABLE `doctor_availability` (
   `start_time` time NOT NULL,
   `end_time` time NOT NULL
 ) ;
+
+--
+-- Dumping data for table `doctor_availability`
+--
+
+INSERT INTO `doctor_availability` (`availability_id`, `doctor_id`, `availability_date`, `start_time`, `end_time`) VALUES
+(4, 2, '2023-01-01', '09:00:00', '14:00:00');
 
 --
 -- Triggers `doctor_availability`
@@ -156,8 +182,21 @@ CREATE TABLE `immunization` (
   `immunization_id` int(11) NOT NULL,
   `patient_id` int(11) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
-  `date_given` date DEFAULT NULL
+  `immunization_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Triggers `immunization`
+--
+DELIMITER $$
+CREATE TRIGGER `immunization_date_trigger` BEFORE INSERT ON `immunization` FOR EACH ROW BEGIN
+    IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Invalid immunization date. Only dates between January 1950 and the current date are allowed.';
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -281,7 +320,7 @@ CREATE TABLE `telephone` (
 --
 ALTER TABLE `appointment`
   ADD PRIMARY KEY (`appointment_id`),
-  ADD UNIQUE KEY `unique_patient_appointment` (`patient_id`,`date`,`start_time`),
+  ADD UNIQUE KEY `unique_patient_appointment` (`patient_id`,`appointment_date`,`start_time`),
   ADD KEY `patient_id` (`patient_id`),
   ADD KEY `doctor_id` (`doctor_id`);
 
