@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:8889
--- Generation Time: Apr 19, 2023 at 07:45 PM
--- Server version: 5.7.39
--- PHP Version: 7.4.33
+-- Host: localhost
+-- Generation Time: Apr 24, 2023 at 07:43 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -29,23 +29,40 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `appointment` (
   `appointment_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
-  `doctor_id` int(11) DEFAULT NULL,
-  `start_time` datetime DEFAULT NULL,
-  `end_time` datetime DEFAULT NULL,
-  `location` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `availability`
---
-
-CREATE TABLE `availability` (
+  `patient_id` int(11) NOT NULL,
   `doctor_id` int(11) NOT NULL,
-  `available` varchar(30) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `location` varchar(10) NOT NULL
+) ;
+
+--
+-- Dumping data for table `appointment`
+--
+
+INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `date`, `start_time`, `end_time`, `location`) VALUES
+(1, 1, 2, '2023-01-01', '09:00:00', '10:00:00', 'in-person');
+
+--
+-- Triggers `appointment`
+--
+DELIMITER $$
+CREATE TRIGGER `prevent_double_booking` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
+    DECLARE num_appointments INTEGER;
+    SELECT COUNT(*) INTO num_appointments
+    FROM appointment
+    WHERE patient_id = NEW.patient_id
+    AND `date` = NEW.`date`
+    AND start_time <= NEW.end_time
+    AND end_time >= NEW.start_time;
+    IF num_appointments > 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Cannot make two appointments during the same time frame and date.';
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -55,7 +72,7 @@ CREATE TABLE `availability` (
 
 CREATE TABLE `doctor` (
   `doctor_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `doctor`
@@ -67,13 +84,47 @@ INSERT INTO `doctor` (`doctor_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `doctor_availability`
+--
+
+CREATE TABLE `doctor_availability` (
+  `availability_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `availability_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL
+) ;
+
+--
+-- Triggers `doctor_availability`
+--
+DELIMITER $$
+CREATE TRIGGER `prevent_availability_overlap` BEFORE INSERT ON `doctor_availability` FOR EACH ROW BEGIN
+    DECLARE overlap_count INT;
+    SELECT COUNT(*) INTO overlap_count
+    FROM doctor_availability 
+    WHERE doctor_id = NEW.doctor_id 
+    AND availability_date = NEW.availability_date 
+    AND start_time < NEW.end_time 
+    AND end_time > NEW.start_time;
+    
+    IF overlap_count > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'The availability time overlaps with an existing availability.';
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `email`
 --
 
 CREATE TABLE `email` (
   `person_id` int(11) NOT NULL,
   `email` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -83,10 +134,10 @@ CREATE TABLE `email` (
 
 CREATE TABLE `employee` (
   `employee_id` int(11) NOT NULL,
-  `start_date` date DEFAULT NULL,
+  `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `job_title` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `job_title` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `employee`
@@ -106,7 +157,7 @@ CREATE TABLE `immunization` (
   `patient_id` int(11) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `date_given` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -120,7 +171,7 @@ CREATE TABLE `insurance` (
   `name` varchar(50) DEFAULT NULL,
   `policy_number` varchar(20) NOT NULL,
   `group_number` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 -- --------------------------------------------------------
 
@@ -130,10 +181,10 @@ CREATE TABLE `insurance` (
 
 CREATE TABLE `medication` (
   `medication_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
-  `start_date` date DEFAULT NULL,
+  `patient_id` int(11) NOT NULL,
+  `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 -- --------------------------------------------------------
 
@@ -143,11 +194,11 @@ CREATE TABLE `medication` (
 
 CREATE TABLE `message` (
   `message_id` int(11) NOT NULL,
-  `sender_id` int(11) DEFAULT NULL,
-  `receiver_id` int(11) DEFAULT NULL,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
   `title` varchar(50) DEFAULT NULL,
   `body` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -158,7 +209,7 @@ CREATE TABLE `message` (
 CREATE TABLE `patient` (
   `patient_id` int(11) NOT NULL,
   `minor` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `patient`
@@ -179,7 +230,7 @@ CREATE TABLE `person` (
   `middle_intial` char(1) DEFAULT NULL,
   `last_name` varchar(50) NOT NULL,
   `birth_date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 --
 -- Dumping data for table `person`
@@ -208,7 +259,7 @@ INSERT INTO `person` (`person_id`, `first_name`, `middle_intial`, `last_name`, `
 CREATE TABLE `specialty` (
   `doctor_id` int(11) NOT NULL,
   `specialty` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -219,7 +270,7 @@ CREATE TABLE `specialty` (
 CREATE TABLE `telephone` (
   `person_id` int(11) NOT NULL,
   `telephone` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -230,20 +281,22 @@ CREATE TABLE `telephone` (
 --
 ALTER TABLE `appointment`
   ADD PRIMARY KEY (`appointment_id`),
+  ADD UNIQUE KEY `unique_patient_appointment` (`patient_id`,`date`,`start_time`),
   ADD KEY `patient_id` (`patient_id`),
   ADD KEY `doctor_id` (`doctor_id`);
-
---
--- Indexes for table `availability`
---
-ALTER TABLE `availability`
-  ADD PRIMARY KEY (`doctor_id`,`available`);
 
 --
 -- Indexes for table `doctor`
 --
 ALTER TABLE `doctor`
   ADD PRIMARY KEY (`doctor_id`);
+
+--
+-- Indexes for table `doctor_availability`
+--
+ALTER TABLE `doctor_availability`
+  ADD PRIMARY KEY (`availability_id`),
+  ADD KEY `doctor_id` (`doctor_id`);
 
 --
 -- Indexes for table `email`
@@ -272,6 +325,7 @@ ALTER TABLE `insurance`
   ADD PRIMARY KEY (`insurance_id`),
   ADD UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
   ADD UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
+  ADD UNIQUE KEY `policy_number_2` (`policy_number`,`group_number`),
   ADD KEY `patient_id` (`patient_id`);
 
 --
@@ -318,6 +372,18 @@ ALTER TABLE `telephone`
 --
 
 --
+-- AUTO_INCREMENT for table `appointment`
+--
+ALTER TABLE `appointment`
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `doctor_availability`
+--
+ALTER TABLE `doctor_availability`
+  MODIFY `availability_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `immunization`
 --
 ALTER TABLE `immunization`
@@ -345,7 +411,7 @@ ALTER TABLE `message`
 -- AUTO_INCREMENT for table `person`
 --
 ALTER TABLE `person`
-  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -359,16 +425,16 @@ ALTER TABLE `appointment`
   ADD CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
 
 --
--- Constraints for table `availability`
---
-ALTER TABLE `availability`
-  ADD CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
-
---
 -- Constraints for table `doctor`
 --
 ALTER TABLE `doctor`
   ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `person` (`person_id`);
+
+--
+-- Constraints for table `doctor_availability`
+--
+ALTER TABLE `doctor_availability`
+  ADD CONSTRAINT `doctor_availability_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
 
 --
 -- Constraints for table `email`
