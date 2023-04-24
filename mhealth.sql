@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 25, 2023 at 01:23 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1:3306
+-- Generation Time: Apr 24, 2023 at 11:44 PM
+-- Server version: 8.0.31
+-- PHP Version: 8.0.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,14 +27,19 @@ SET time_zone = "+00:00";
 -- Table structure for table `appointment`
 --
 
-CREATE TABLE `appointment` (
-  `appointment_id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `doctor_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `appointment`;
+CREATE TABLE IF NOT EXISTS `appointment` (
+  `appointment_id` int NOT NULL AUTO_INCREMENT,
+  `patient_id` int NOT NULL,
+  `doctor_id` int NOT NULL,
   `appointment_date` date NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
-  `location` varchar(10) NOT NULL
+  `location` varchar(10) NOT NULL,
+  PRIMARY KEY (`appointment_id`),
+  UNIQUE KEY `unique_patient_appointment` (`patient_id`,`appointment_date`,`start_time`),
+  KEY `patient_id` (`patient_id`),
+  KEY `doctor_id` (`doctor_id`)
 ) ;
 
 --
@@ -47,6 +52,7 @@ INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `appoint
 --
 -- Triggers `appointment`
 --
+DROP TRIGGER IF EXISTS `check_doctor_availability_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `check_doctor_availability_trigger_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     IF NOT EXISTS (
@@ -66,6 +72,7 @@ CREATE TRIGGER `check_doctor_availability_trigger_insert` BEFORE INSERT ON `appo
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `check_doctor_availability_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `check_doctor_availability_trigger_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
     IF NOT EXISTS (
@@ -85,6 +92,7 @@ CREATE TRIGGER `check_doctor_availability_trigger_update` BEFORE UPDATE ON `appo
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `prevent_double_booking_insert`;
 DELIMITER $$
 CREATE TRIGGER `prevent_double_booking_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
@@ -101,6 +109,7 @@ CREATE TRIGGER `prevent_double_booking_insert` BEFORE INSERT ON `appointment` FO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `prevent_double_booking_update`;
 DELIMITER $$
 CREATE TRIGGER `prevent_double_booking_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
@@ -124,9 +133,11 @@ DELIMITER ;
 -- Table structure for table `doctor`
 --
 
-CREATE TABLE `doctor` (
-  `doctor_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+DROP TABLE IF EXISTS `doctor`;
+CREATE TABLE IF NOT EXISTS `doctor` (
+  `doctor_id` int NOT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `doctor`
@@ -141,12 +152,15 @@ INSERT INTO `doctor` (`doctor_id`) VALUES
 -- Table structure for table `doctor_availability`
 --
 
-CREATE TABLE `doctor_availability` (
-  `availability_id` int(11) NOT NULL,
-  `doctor_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `doctor_availability`;
+CREATE TABLE IF NOT EXISTS `doctor_availability` (
+  `availability_id` int NOT NULL AUTO_INCREMENT,
+  `doctor_id` int NOT NULL,
   `availability_date` date NOT NULL,
   `start_time` time NOT NULL,
-  `end_time` time NOT NULL
+  `end_time` time NOT NULL,
+  PRIMARY KEY (`availability_id`),
+  KEY `doctor_id` (`doctor_id`)
 ) ;
 
 --
@@ -159,6 +173,7 @@ INSERT INTO `doctor_availability` (`availability_id`, `doctor_id`, `availability
 --
 -- Triggers `doctor_availability`
 --
+DROP TRIGGER IF EXISTS `prevent_availability_overlap_insert`;
 DELIMITER $$
 CREATE TRIGGER `prevent_availability_overlap_insert` BEFORE INSERT ON `doctor_availability` FOR EACH ROW BEGIN
     DECLARE overlap_count INT;
@@ -175,6 +190,7 @@ CREATE TRIGGER `prevent_availability_overlap_insert` BEFORE INSERT ON `doctor_av
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `prevent_availability_overlap_update`;
 DELIMITER $$
 CREATE TRIGGER `prevent_availability_overlap_update` BEFORE UPDATE ON `doctor_availability` FOR EACH ROW BEGIN
     DECLARE overlap_count INT;
@@ -198,10 +214,13 @@ DELIMITER ;
 -- Table structure for table `email`
 --
 
-CREATE TABLE `email` (
-  `person_id` int(11) NOT NULL,
-  `email` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+DROP TABLE IF EXISTS `email`;
+CREATE TABLE IF NOT EXISTS `email` (
+  `person_id` int NOT NULL,
+  `email` varchar(50) NOT NULL,
+  PRIMARY KEY (`person_id`,`email`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -209,12 +228,14 @@ CREATE TABLE `email` (
 -- Table structure for table `employee`
 --
 
-CREATE TABLE `employee` (
-  `employee_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `employee`;
+CREATE TABLE IF NOT EXISTS `employee` (
+  `employee_id` int NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `job_title` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `job_title` varchar(50) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `employee`
@@ -229,16 +250,20 @@ INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`) VA
 -- Table structure for table `immunization`
 --
 
-CREATE TABLE `immunization` (
-  `immunization_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `immunization`;
+CREATE TABLE IF NOT EXISTS `immunization` (
+  `immunization_id` int NOT NULL AUTO_INCREMENT,
+  `patient_id` int DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
-  `immunization_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `immunization_date` date DEFAULT NULL,
+  PRIMARY KEY (`immunization_id`),
+  KEY `patient_id` (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Triggers `immunization`
 --
+DROP TRIGGER IF EXISTS `immunization_date_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `immunization_date_trigger_insert` BEFORE INSERT ON `immunization` FOR EACH ROW BEGIN
     IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
@@ -248,6 +273,7 @@ CREATE TRIGGER `immunization_date_trigger_insert` BEFORE INSERT ON `immunization
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `immunization_date_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `immunization_date_trigger_update` BEFORE UPDATE ON `immunization` FOR EACH ROW BEGIN
     IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
@@ -264,12 +290,18 @@ DELIMITER ;
 -- Table structure for table `insurance`
 --
 
-CREATE TABLE `insurance` (
-  `insurance_id` int(11) NOT NULL,
-  `patient_id` int(11) DEFAULT NULL,
+DROP TABLE IF EXISTS `insurance`;
+CREATE TABLE IF NOT EXISTS `insurance` (
+  `insurance_id` int NOT NULL AUTO_INCREMENT,
+  `patient_id` int DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `policy_number` varchar(20) NOT NULL,
-  `group_number` varchar(20) NOT NULL
+  `group_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`insurance_id`),
+  UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
+  UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
+  UNIQUE KEY `policy_number_2` (`policy_number`,`group_number`),
+  KEY `patient_id` (`patient_id`)
 ) ;
 
 -- --------------------------------------------------------
@@ -278,11 +310,14 @@ CREATE TABLE `insurance` (
 -- Table structure for table `medication`
 --
 
-CREATE TABLE `medication` (
-  `medication_id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `medication`;
+CREATE TABLE IF NOT EXISTS `medication` (
+  `medication_id` int NOT NULL AUTO_INCREMENT,
+  `patient_id` int NOT NULL,
   `start_date` date NOT NULL,
-  `end_date` date DEFAULT NULL
+  `end_date` date DEFAULT NULL,
+  PRIMARY KEY (`medication_id`),
+  KEY `patient_id` (`patient_id`)
 ) ;
 
 -- --------------------------------------------------------
@@ -291,13 +326,17 @@ CREATE TABLE `medication` (
 -- Table structure for table `message`
 --
 
-CREATE TABLE `message` (
-  `message_id` int(11) NOT NULL,
-  `sender_id` int(11) NOT NULL,
-  `receiver_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE IF NOT EXISTS `message` (
+  `message_id` int NOT NULL AUTO_INCREMENT,
+  `sender_id` int NOT NULL,
+  `receiver_id` int NOT NULL,
   `title` varchar(50) DEFAULT NULL,
-  `body` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `body` text NOT NULL,
+  PRIMARY KEY (`message_id`),
+  KEY `sender_id` (`sender_id`),
+  KEY `receiver_id` (`receiver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -305,17 +344,21 @@ CREATE TABLE `message` (
 -- Table structure for table `patient`
 --
 
-CREATE TABLE `patient` (
-  `patient_id` int(11) NOT NULL,
-  `minor` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+DROP TABLE IF EXISTS `patient`;
+CREATE TABLE IF NOT EXISTS `patient` (
+  `patient_id` int NOT NULL,
+  `minor` tinyint(1) DEFAULT NULL,
+  `login_name` varchar(40) NOT NULL,
+  `password_hash` binary(64) NOT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `patient`
 --
 
-INSERT INTO `patient` (`patient_id`, `minor`) VALUES
-(1, 0);
+INSERT INTO `patient` (`patient_id`, `minor`, `login_name`, `password_hash`) VALUES
+(1, 0, '', 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
 
 -- --------------------------------------------------------
 
@@ -323,12 +366,14 @@ INSERT INTO `patient` (`patient_id`, `minor`) VALUES
 -- Table structure for table `person`
 --
 
-CREATE TABLE `person` (
-  `person_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `person`;
+CREATE TABLE IF NOT EXISTS `person` (
+  `person_id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(50) NOT NULL,
   `middle_intial` char(1) DEFAULT NULL,
   `last_name` varchar(50) NOT NULL,
-  `birth_date` date NOT NULL
+  `birth_date` date NOT NULL,
+  PRIMARY KEY (`person_id`)
 ) ;
 
 --
@@ -355,10 +400,12 @@ INSERT INTO `person` (`person_id`, `first_name`, `middle_intial`, `last_name`, `
 -- Table structure for table `specialty`
 --
 
-CREATE TABLE `specialty` (
-  `doctor_id` int(11) NOT NULL,
-  `specialty` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+DROP TABLE IF EXISTS `specialty`;
+CREATE TABLE IF NOT EXISTS `specialty` (
+  `doctor_id` int NOT NULL,
+  `specialty` varchar(50) NOT NULL,
+  PRIMARY KEY (`doctor_id`,`specialty`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -366,229 +413,12 @@ CREATE TABLE `specialty` (
 -- Table structure for table `telephone`
 --
 
-CREATE TABLE `telephone` (
-  `person_id` int(11) NOT NULL,
-  `telephone` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `appointment`
---
-ALTER TABLE `appointment`
-  ADD PRIMARY KEY (`appointment_id`),
-  ADD UNIQUE KEY `unique_patient_appointment` (`patient_id`,`appointment_date`,`start_time`),
-  ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
-
---
--- Indexes for table `doctor`
---
-ALTER TABLE `doctor`
-  ADD PRIMARY KEY (`doctor_id`);
-
---
--- Indexes for table `doctor_availability`
---
-ALTER TABLE `doctor_availability`
-  ADD PRIMARY KEY (`availability_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
-
---
--- Indexes for table `email`
---
-ALTER TABLE `email`
-  ADD PRIMARY KEY (`person_id`,`email`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- Indexes for table `employee`
---
-ALTER TABLE `employee`
-  ADD PRIMARY KEY (`employee_id`);
-
---
--- Indexes for table `immunization`
---
-ALTER TABLE `immunization`
-  ADD PRIMARY KEY (`immunization_id`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `insurance`
---
-ALTER TABLE `insurance`
-  ADD PRIMARY KEY (`insurance_id`),
-  ADD UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
-  ADD UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
-  ADD UNIQUE KEY `policy_number_2` (`policy_number`,`group_number`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `medication`
---
-ALTER TABLE `medication`
-  ADD PRIMARY KEY (`medication_id`),
-  ADD KEY `patient_id` (`patient_id`);
-
---
--- Indexes for table `message`
---
-ALTER TABLE `message`
-  ADD PRIMARY KEY (`message_id`),
-  ADD KEY `sender_id` (`sender_id`),
-  ADD KEY `receiver_id` (`receiver_id`);
-
---
--- Indexes for table `patient`
---
-ALTER TABLE `patient`
-  ADD PRIMARY KEY (`patient_id`);
-
---
--- Indexes for table `person`
---
-ALTER TABLE `person`
-  ADD PRIMARY KEY (`person_id`);
-
---
--- Indexes for table `specialty`
---
-ALTER TABLE `specialty`
-  ADD PRIMARY KEY (`doctor_id`,`specialty`);
-
---
--- Indexes for table `telephone`
---
-ALTER TABLE `telephone`
-  ADD PRIMARY KEY (`person_id`,`telephone`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `appointment`
---
-ALTER TABLE `appointment`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `doctor_availability`
---
-ALTER TABLE `doctor_availability`
-  MODIFY `availability_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `immunization`
---
-ALTER TABLE `immunization`
-  MODIFY `immunization_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `insurance`
---
-ALTER TABLE `insurance`
-  MODIFY `insurance_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `medication`
---
-ALTER TABLE `medication`
-  MODIFY `medication_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `message`
---
-ALTER TABLE `message`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `person`
---
-ALTER TABLE `person`
-  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `appointment`
---
-ALTER TABLE `appointment`
-  ADD CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`),
-  ADD CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
-
---
--- Constraints for table `doctor`
---
-ALTER TABLE `doctor`
-  ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `person` (`person_id`);
-
---
--- Constraints for table `doctor_availability`
---
-ALTER TABLE `doctor_availability`
-  ADD CONSTRAINT `doctor_availability_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
-
---
--- Constraints for table `email`
---
-ALTER TABLE `email`
-  ADD CONSTRAINT `email_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `person` (`person_id`);
-
---
--- Constraints for table `employee`
---
-ALTER TABLE `employee`
-  ADD CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `person` (`person_id`);
-
---
--- Constraints for table `immunization`
---
-ALTER TABLE `immunization`
-  ADD CONSTRAINT `immunization_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`);
-
---
--- Constraints for table `insurance`
---
-ALTER TABLE `insurance`
-  ADD CONSTRAINT `insurance_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`);
-
---
--- Constraints for table `medication`
---
-ALTER TABLE `medication`
-  ADD CONSTRAINT `medication_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`);
-
---
--- Constraints for table `message`
---
-ALTER TABLE `message`
-  ADD CONSTRAINT `message_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `employee` (`employee_id`),
-  ADD CONSTRAINT `message_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `patient` (`patient_id`);
-
---
--- Constraints for table `patient`
---
-ALTER TABLE `patient`
-  ADD CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `person` (`person_id`);
-
---
--- Constraints for table `specialty`
---
-ALTER TABLE `specialty`
-  ADD CONSTRAINT `specialty_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`);
-
---
--- Constraints for table `telephone`
---
-ALTER TABLE `telephone`
-  ADD CONSTRAINT `telephone_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `person` (`person_id`);
+DROP TABLE IF EXISTS `telephone`;
+CREATE TABLE IF NOT EXISTS `telephone` (
+  `person_id` int NOT NULL,
+  `telephone` int NOT NULL,
+  PRIMARY KEY (`person_id`,`telephone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
