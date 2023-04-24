@@ -1,1 +1,4 @@
+--Appointment Check Constraints
 
+ALTER TABLE appointment
+  ADD CONSTRAINT location_domain CHECK (location IN ("online", "in-person", "Online", "In-person"));
