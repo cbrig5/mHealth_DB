@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 24, 2023 at 11:55 PM
+-- Generation Time: Apr 25, 2023 at 01:23 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -48,7 +48,7 @@ INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `appoint
 -- Triggers `appointment`
 --
 DELIMITER $$
-CREATE TRIGGER `check_doctor_availability_trigger` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
+CREATE TRIGGER `check_doctor_availability_trigger_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     IF NOT EXISTS (
         SELECT *
         FROM doctor_availability
@@ -67,7 +67,42 @@ END
 $$
 DELIMITER ;
 DELIMITER $$
-CREATE TRIGGER `prevent_double_booking` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
+CREATE TRIGGER `check_doctor_availability_trigger_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
+    IF NOT EXISTS (
+        SELECT *
+        FROM doctor_availability
+        WHERE doctor_id = NEW.doctor_id
+        AND `availability_date` = NEW.appointment_date
+        AND (
+            (NEW.start_time BETWEEN start_time AND end_time)
+            AND (NEW.end_time BETWEEN start_time AND end_time)
+
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Doctor is not available at the given date and time.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `prevent_double_booking_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
+    DECLARE num_appointments INTEGER;
+    SELECT COUNT(*) INTO num_appointments
+    FROM appointment
+    WHERE patient_id = NEW.patient_id
+    AND `appointment_date` = NEW.`appointment_date`
+    AND start_time <= NEW.end_time
+    AND end_time >= NEW.start_time;
+    IF num_appointments > 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Cannot make two appointments during the same time frame and date.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `prevent_double_booking_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
     SELECT COUNT(*) INTO num_appointments
     FROM appointment
@@ -125,7 +160,23 @@ INSERT INTO `doctor_availability` (`availability_id`, `doctor_id`, `availability
 -- Triggers `doctor_availability`
 --
 DELIMITER $$
-CREATE TRIGGER `prevent_availability_overlap` BEFORE INSERT ON `doctor_availability` FOR EACH ROW BEGIN
+CREATE TRIGGER `prevent_availability_overlap_insert` BEFORE INSERT ON `doctor_availability` FOR EACH ROW BEGIN
+    DECLARE overlap_count INT;
+    SELECT COUNT(*) INTO overlap_count
+    FROM doctor_availability 
+    WHERE doctor_id = NEW.doctor_id 
+    AND availability_date = NEW.availability_date 
+    AND start_time < NEW.end_time 
+    AND end_time > NEW.start_time;
+    
+    IF overlap_count > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'The availability time overlaps with an existing availability.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `prevent_availability_overlap_update` BEFORE UPDATE ON `doctor_availability` FOR EACH ROW BEGIN
     DECLARE overlap_count INT;
     SELECT COUNT(*) INTO overlap_count
     FROM doctor_availability 
@@ -189,7 +240,16 @@ CREATE TABLE `immunization` (
 -- Triggers `immunization`
 --
 DELIMITER $$
-CREATE TRIGGER `immunization_date_trigger` BEFORE INSERT ON `immunization` FOR EACH ROW BEGIN
+CREATE TRIGGER `immunization_date_trigger_insert` BEFORE INSERT ON `immunization` FOR EACH ROW BEGIN
+    IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Invalid immunization date. Only dates between January 1950 and the current date are allowed.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `immunization_date_trigger_update` BEFORE UPDATE ON `immunization` FOR EACH ROW BEGIN
     IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Invalid immunization date. Only dates between January 1950 and the current date are allowed.';
