@@ -373,8 +373,8 @@ CREATE TABLE `patient` (
 
 
 
-INSERT INTO `patient` (`patient_id`, `minor`, `password_hash`, `school_email`) VALUES
-(1, 0, '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'etay1@brockport.edu');
+INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
+(1,'5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'etay1@brockport.edu');
 
 
 -- --------------------------------------------------------
