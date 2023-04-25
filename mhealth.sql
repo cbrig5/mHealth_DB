@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 25, 2023 at 03:17 AM
+-- Generation Time: Apr 25, 2023 at 05:19 AM
 -- Server version: 8.0.31
 -- PHP Version: 8.0.26
 
@@ -338,7 +338,7 @@ DROP TABLE IF EXISTS `patient`;
 CREATE TABLE IF NOT EXISTS `patient` (
   `patient_id` int NOT NULL,
   `minor` tinyint(1) DEFAULT NULL,
-  `password_hash` binary(64) NOT NULL,
+  `password_hash` varchar(256) NOT NULL,
   `school_email` varchar(50) NOT NULL,
   PRIMARY KEY (`patient_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
@@ -348,7 +348,7 @@ CREATE TABLE IF NOT EXISTS `patient` (
 --
 
 INSERT INTO `patient` (`patient_id`, `minor`, `password_hash`, `school_email`) VALUES
-(1, 0, 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, '');
+(1, 0, '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'etay1@brockport.edu');
 
 -- --------------------------------------------------------
 
