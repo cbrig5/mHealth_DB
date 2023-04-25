@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 25, 2023 at 03:04 AM
+-- Generation Time: Apr 25, 2023 at 03:17 AM
 -- Server version: 8.0.31
 -- PHP Version: 8.0.26
 
@@ -137,7 +137,7 @@ DROP TABLE IF EXISTS `doctor`;
 CREATE TABLE IF NOT EXISTS `doctor` (
   `doctor_id` int NOT NULL,
   `primary_email` varchar(50) NOT NULL,
-  `secondary_email` varchar(50) NOT NULL,
+  `secondary_email` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`doctor_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `employee` (
   `end_date` date DEFAULT NULL,
   `job_title` varchar(50) NOT NULL,
   `primary_email` varchar(50) NOT NULL,
-  `secondary_email` varchar(50) NOT NULL,
+  `secondary_email` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`employee_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
