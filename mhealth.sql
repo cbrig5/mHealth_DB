@@ -2,10 +2,13 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
+domain-trigger-and-minor-view
 -- Host: localhost
 -- Generation Time: Apr 25, 2023 at 08:01 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
+
+
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -356,18 +359,23 @@ CREATE TABLE `minor_status` (
 -- Table structure for table `patient`
 --
 
+
 CREATE TABLE `patient` (
   `patient_id` int(11) NOT NULL,
   `password_hash` binary(64) NOT NULL,
   `school_email` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+
 --
 -- Dumping data for table `patient`
 --
 
-INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
-(1, 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, '');
+
+
+INSERT INTO `patient` (`patient_id`, `minor`, `password_hash`, `school_email`) VALUES
+(1, 0, '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'etay1@brockport.edu');
+
 
 -- --------------------------------------------------------
 
