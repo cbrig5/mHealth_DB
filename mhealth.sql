@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 24, 2023 at 11:44 PM
+-- Generation Time: Apr 25, 2023 at 03:04 AM
 -- Server version: 8.0.31
 -- PHP Version: 8.0.26
 
@@ -136,6 +136,8 @@ DELIMITER ;
 DROP TABLE IF EXISTS `doctor`;
 CREATE TABLE IF NOT EXISTS `doctor` (
   `doctor_id` int NOT NULL,
+  `primary_email` varchar(50) NOT NULL,
+  `secondary_email` varchar(50) NOT NULL,
   PRIMARY KEY (`doctor_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -143,8 +145,8 @@ CREATE TABLE IF NOT EXISTS `doctor` (
 -- Dumping data for table `doctor`
 --
 
-INSERT INTO `doctor` (`doctor_id`) VALUES
-(2);
+INSERT INTO `doctor` (`doctor_id`, `primary_email`, `secondary_email`) VALUES
+(2, '', '');
 
 -- --------------------------------------------------------
 
@@ -211,20 +213,6 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `email`
---
-
-DROP TABLE IF EXISTS `email`;
-CREATE TABLE IF NOT EXISTS `email` (
-  `person_id` int NOT NULL,
-  `email` varchar(50) NOT NULL,
-  PRIMARY KEY (`person_id`,`email`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `employee`
 --
 
@@ -234,6 +222,8 @@ CREATE TABLE IF NOT EXISTS `employee` (
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `job_title` varchar(50) NOT NULL,
+  `primary_email` varchar(50) NOT NULL,
+  `secondary_email` varchar(50) NOT NULL,
   PRIMARY KEY (`employee_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -241,8 +231,8 @@ CREATE TABLE IF NOT EXISTS `employee` (
 -- Dumping data for table `employee`
 --
 
-INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`) VALUES
-(3, '2019-10-10', NULL, 'Secretary');
+INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `primary_email`, `secondary_email`) VALUES
+(3, '2019-10-10', NULL, 'Secretary', '', '');
 
 -- --------------------------------------------------------
 
@@ -348,8 +338,8 @@ DROP TABLE IF EXISTS `patient`;
 CREATE TABLE IF NOT EXISTS `patient` (
   `patient_id` int NOT NULL,
   `minor` tinyint(1) DEFAULT NULL,
-  `login_name` varchar(40) NOT NULL,
   `password_hash` binary(64) NOT NULL,
+  `school_email` varchar(50) NOT NULL,
   PRIMARY KEY (`patient_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
@@ -357,8 +347,8 @@ CREATE TABLE IF NOT EXISTS `patient` (
 -- Dumping data for table `patient`
 --
 
-INSERT INTO `patient` (`patient_id`, `minor`, `login_name`, `password_hash`) VALUES
-(1, 0, '', 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+INSERT INTO `patient` (`patient_id`, `minor`, `password_hash`, `school_email`) VALUES
+(1, 0, 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, '');
 
 -- --------------------------------------------------------
 
