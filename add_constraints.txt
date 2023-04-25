@@ -10,7 +10,11 @@ ALTER TABLE insurance
 	ADD CONSTRAINT policy_group_chk CHECK (policy_number != group_number);
 
 ALTER TABLE medication 
-	ADD CONSTRAINT start_after_end_date CHECK (start_date < end_date);
+	ADD CONSTRAINT end_date_chk CHECK (start_date < end_date);
 	
 ALTER TABLE person
 	ADD CONSTRAINT birth_date_domain CHECK (birth_date BETWEEN "1900-01-01" AND "2014-01-31");
+	
+ALTER TABLE employee
+	ADD CONSTRAINT employee_end_date_chk CHECK (start_date < end_date);
+
