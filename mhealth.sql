@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 25, 2023 at 08:01 AM
+-- Generation Time: Apr 27, 2023 at 01:43 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -42,7 +42,11 @@ CREATE TABLE `appointment` (
 --
 
 INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `appointment_date`, `start_time`, `end_time`, `location`) VALUES
-(1, 1, 2, '2023-01-01', '09:00:00', '10:00:00', 'in-person');
+(1, 21, 1, '2023-10-02', '10:00:00', '11:00:00', 'in-person'),
+(2, 23, 4, '2023-10-02', '09:00:00', '10:30:00', 'online'),
+(3, 26, 6, '2023-10-06', '10:00:00', '11:00:00', 'in-person'),
+(4, 29, 8, '2023-10-04', '14:00:00', '15:00:00', 'online'),
+(5, 30, 10, '2023-10-04', '09:00:00', '11:00:00', 'in-person');
 
 --
 -- Triggers `appointment`
@@ -121,6 +125,21 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `current_employee`
+-- (See below for the actual view)
+--
+CREATE TABLE `current_employee` (
+`FullName` varchar(103)
+,`JobTitle` varchar(50)
+,`YearsWorked` varchar(65)
+,`PrimaryEmail` varchar(50)
+,`SecondaryEmail` varchar(50)
+,`PhoneNumbers` longtext
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `doctor`
 --
 
@@ -135,7 +154,16 @@ CREATE TABLE `doctor` (
 --
 
 INSERT INTO `doctor` (`doctor_id`, `primary_email`, `secondary_email`) VALUES
-(2, '', '');
+(1, 'elijah.tay@outlook.com', 'null'),
+(2, 'corey.bright@gmail.com', 'corey.bright.other@gmail.com'),
+(3, 'angela.gagnon@yahoo.com', 'angela.gagnon.assist@yahoo.com'),
+(4, 'hapreet.bains@hotmail.com', 'null'),
+(5, 'adesh.rai@icloud.com', 'adesh.rai.contact@icloud.com'),
+(6, 'hannah.applebaum@protonmail.com', 'hannah.applebaum.alt@protonmail.com'),
+(7, 'faizan.rafieuddin@aol.com', 'faizan.rafieuddin.support@aol.com'),
+(8, 'john.doe@mail.com', 'null'),
+(9, 'bob.smith@yandex.com', 'bob.smith.contact@yandex.com'),
+(10, 'alice.johnson@live.com', 'alice.johnson.assist@live.com');
 
 -- --------------------------------------------------------
 
@@ -156,7 +184,36 @@ CREATE TABLE `doctor_availability` (
 --
 
 INSERT INTO `doctor_availability` (`availability_id`, `doctor_id`, `availability_date`, `start_time`, `end_time`) VALUES
-(4, 2, '2023-01-01', '09:00:00', '14:00:00');
+(1, 1, '2023-10-02', '09:00:00', '13:00:00'),
+(2, 1, '2023-10-04', '12:00:00', '16:00:00'),
+(3, 1, '2023-10-06', '08:00:00', '12:00:00'),
+(4, 2, '2023-10-02', '14:00:00', '18:00:00'),
+(5, 2, '2023-10-04', '09:00:00', '13:00:00'),
+(6, 2, '2023-10-06', '11:00:00', '15:00:00'),
+(7, 3, '2023-10-02', '11:00:00', '15:00:00'),
+(8, 3, '2023-10-04', '14:00:00', '18:00:00'),
+(9, 3, '2023-10-06', '10:00:00', '14:00:00'),
+(10, 4, '2023-10-02', '09:00:00', '13:00:00'),
+(11, 4, '2023-10-04', '11:00:00', '15:00:00'),
+(12, 4, '2023-10-06', '12:00:00', '16:00:00'),
+(13, 5, '2023-10-02', '08:00:00', '12:00:00'),
+(14, 5, '2023-10-04', '13:00:00', '17:00:00'),
+(15, 5, '2023-10-06', '10:00:00', '14:00:00'),
+(16, 6, '2023-10-02', '11:00:00', '15:00:00'),
+(17, 6, '2023-10-04', '14:00:00', '18:00:00'),
+(18, 6, '2023-10-06', '08:00:00', '12:00:00'),
+(19, 7, '2023-10-02', '12:00:00', '16:00:00'),
+(20, 7, '2023-10-04', '10:00:00', '14:00:00'),
+(21, 7, '2023-10-06', '13:00:00', '17:00:00'),
+(22, 8, '2023-10-02', '08:00:00', '12:00:00'),
+(23, 8, '2023-10-04', '09:00:00', '15:00:00'),
+(24, 8, '2023-10-06', '13:00:00', '17:00:00'),
+(25, 9, '2023-10-02', '09:00:00', '15:00:00'),
+(26, 9, '2023-10-04', '10:00:00', '16:00:00'),
+(27, 9, '2023-10-06', '12:00:00', '16:00:00'),
+(28, 10, '2023-10-02', '11:00:00', '15:00:00'),
+(29, 10, '2023-10-04', '08:00:00', '14:00:00'),
+(30, 10, '2023-10-06', '13:00:00', '18:00:00');
 
 --
 -- Triggers `doctor_availability`
@@ -197,6 +254,34 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `doctor_info`
+-- (See below for the actual view)
+--
+CREATE TABLE `doctor_info` (
+`FullName` varchar(107)
+,`Specialties` mediumtext
+,`AvailabilityDate` varchar(10)
+,`AvailabilityTime` varchar(19)
+,`PrimaryEmail` varchar(50)
+,`TelephoneNumbers` longtext
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `doctor_upcoming_appts`
+-- (See below for the actual view)
+--
+CREATE TABLE `doctor_upcoming_appts` (
+`AppointmentDate` date
+,`AppointmentTime` varchar(23)
+,`AppointmentLocation` varchar(10)
+,`Name_exp_4` varchar(101)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `employee`
 --
 
@@ -214,8 +299,16 @@ CREATE TABLE `employee` (
 --
 
 INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `primary_email`, `secondary_email`) VALUES
-(3, '2019-10-10', NULL, 'Secretary', '', ''),
-(6, '2019-10-10', NULL, 'Secretary', 'jlkn', NULL);
+(11, '1990-05-11', '1991-11-30', 'Nurse', 'nurse11@example.com', 'nurse11_secondary@example.com'),
+(12, '2018-07-01', NULL, 'Receptionist', 'receptionist12@example.com', NULL),
+(13, '2020-02-15', NULL, 'Medical Assistant', 'assistant13@example.com', 'assistant13_secondary@example.com'),
+(14, '2015-09-01', '2020-02-29', 'Billing Specialist', 'billing14@example.com', 'billing14_secondary@example.com'),
+(15, '1988-12-24', '2001-08-31', 'Medical Coder', 'coder15@example.com', NULL),
+(16, '2017-02-01', NULL, 'Medical Transcriptionist', 'transcriptionist16@example.com', NULL),
+(17, '2010-01-15', '2011-06-30', 'Medical Records Clerk', 'records17@example.com', 'records17_secondary@example.com'),
+(18, '1986-06-20', '1989-05-01', 'Medical Billing Specialist', 'billing18@example.com', NULL),
+(19, '1995-11-01', '2000-04-30', 'Medical Assistant', 'assistant19@example.com', 'assistant19_secondary@example.com'),
+(20, '2019-10-15', NULL, 'Receptionist', 'receptionist20@example.com', NULL);
 
 --
 -- Triggers `employee`
@@ -239,6 +332,28 @@ CREATE TRIGGER `employee_date_trigger_update` BEFORE UPDATE ON `employee` FOR EA
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `formatted_telephone`
+-- (See below for the actual view)
+--
+CREATE TABLE `formatted_telephone` (
+`person_id` int(11)
+,`formatted_telephone` mediumtext
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `full_name`
+-- (See below for the actual view)
+--
+CREATE TABLE `full_name` (
+`person_id` int(11)
+,`FullName` varchar(103)
+);
 
 -- --------------------------------------------------------
 
@@ -341,11 +456,27 @@ CREATE TABLE `message` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `message_details`
+-- (See below for the actual view)
+--
+CREATE TABLE `message_details` (
+`MessageID` int(11)
+,`SenderID` int(11)
+,`Name_exp_3` varchar(101)
+,`SenderEmail` varchar(50)
+,`SenderPhoneNumber` varchar(15)
+,`Title` varchar(50)
+,`Body` text
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `minor_status`
 -- (See below for the actual view)
 --
 CREATE TABLE `minor_status` (
-`name` varchar(101)
+`Name_exp_1` varchar(103)
 ,`birth_date` date
 ,`status` varchar(5)
 );
@@ -367,7 +498,43 @@ CREATE TABLE `patient` (
 --
 
 INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
-(1, 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, '');
+(21, 0x31663665326139636463383166393366633962666566653838376534623864663161616362333334353264346235393232636666333738353834363061306238, 'user1@brockport.edu'),
+(22, 0x38356235663331353134663133363465626563656562383737386633383037333833396464323138306465393935656566613931363366656366626664616333, 'user2@brockport.edu'),
+(23, 0x30376538613664393063646564323765396666623734663039383564366232316662666138663534383361663135633133303064346361666331333836643566, 'user3@brockport.edu'),
+(24, 0x35393361336165663330363665663336643734373764306662303534396461623135343766396563613737333435393630383765653736343233396130613733, 'user4@brockport.edu'),
+(25, 0x65343230373730656438663462373935643961366338306634663931646336383532633131633166643232353138333933346236656332373233383732653636, 'user5@brockport.edu'),
+(26, 0x37613562393239633036613561363639386339313536396664633164346332393332633032376664363636313738313534363536336264366237656139626130, 'user6@brockport.edu'),
+(27, 0x62386534313536306637663932663032343739353535343137306466393130313830366537626136313738303431653037633262373834666565343365336564, 'user7@brockport.edu'),
+(28, 0x61613636386636363061393466326661643437653139643134393566373564303637646161343736366465303861373237313039333830616139353230333231, 'user8@brockport.edu'),
+(29, 0x64663763623430373265313265366635623233666438346262383930656365623734356164653064373531626434643938303064383564313863376331663137, 'user9@brockport.edu'),
+(30, 0x33383530623239386338333361633339303865616138373636663135616134343535313736356530626363336163383435643263303934326139633236633561, 'user10@brockport.edu');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `patientinfo`
+-- (See below for the actual view)
+--
+CREATE TABLE `patientinfo` (
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `patient_appointment`
+-- (See below for the actual view)
+--
+CREATE TABLE `patient_appointment` (
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `patient_medical_records`
+-- (See below for the actual view)
+--
+CREATE TABLE `patient_medical_records` (
+);
 
 -- --------------------------------------------------------
 
@@ -378,7 +545,7 @@ INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
 CREATE TABLE `person` (
   `person_id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
-  `middle_intial` char(1) DEFAULT NULL,
+  `middle_initial` char(1) DEFAULT NULL,
   `last_name` varchar(50) NOT NULL,
   `birth_date` date NOT NULL
 ) ;
@@ -387,7 +554,7 @@ CREATE TABLE `person` (
 -- Dumping data for table `person`
 --
 
-INSERT INTO `person` (`person_id`, `first_name`, `middle_intial`, `last_name`, `birth_date`) VALUES
+INSERT INTO `person` (`person_id`, `first_name`, `middle_initial`, `last_name`, `birth_date`) VALUES
 (1, 'Elijah', 'C', 'Tay', '1998-09-11'),
 (2, 'Corey', 'J', 'Bright', '2002-11-14'),
 (3, 'Angela', 'K', 'Gagnon', '2001-10-22'),
@@ -398,9 +565,41 @@ INSERT INTO `person` (`person_id`, `first_name`, `middle_intial`, `last_name`, `
 (8, 'John', NULL, 'Doe', '1990-09-01'),
 (9, 'Bob', NULL, 'Smith', '1985-09-21'),
 (10, 'Alice', NULL, 'Johnson', '1988-11-30'),
-(11, 'Mike', NULL, 'Williams', '1996-03-15'),
-(12, 'Jane', NULL, 'Doe', '1992-05-12'),
-(13, 'ima', NULL, 'minor', '2013-01-01');
+(11, 'John', 'A', 'Smith', '1990-07-12'),
+(12, 'Jane', 'B', 'Doe', '1985-05-24'),
+(13, 'Robert', 'C', 'Johnson', '1978-11-03'),
+(14, 'Sarah', NULL, 'Lee', '1956-02-18'),
+(15, 'Michael', 'J', 'Brown', '1962-09-07'),
+(16, 'Lisa', 'K', 'Davis', '1972-12-31'),
+(17, 'Christopher', 'M', 'Wilson', '1968-06-21'),
+(18, 'Amanda', 'L', 'Rodriguez', '1995-04-02'),
+(19, 'David', 'E', 'Martinez', '1980-08-14'),
+(20, 'Jennifer', 'F', 'Thompson', '1987-10-09'),
+(21, 'James', NULL, 'Anderson', '1965-07-28'),
+(22, 'Elizabeth', 'G', 'Wright', '1992-03-11'),
+(23, 'Matthew', 'H', 'Turner', '1974-12-08'),
+(24, 'Ashley', 'I', 'Perez', '1998-01-23'),
+(25, 'Ryan', 'J', 'Jackson', '1982-05-15'),
+(26, 'Nicole', 'K', 'Lewis', '2003-09-22'),
+(27, 'Brian', 'L', 'Green', '2013-04-26'),
+(28, 'Samantha', 'M', 'King', '1983-11-17'),
+(29, 'Daniel', 'N', 'Baker', '2010-02-09'),
+(30, 'Lauren', 'O', 'Nelson', '2008-08-03');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `prior_employees`
+-- (See below for the actual view)
+--
+CREATE TABLE `prior_employees` (
+`FullName` varchar(103)
+,`JobTitle` varchar(50)
+,`YearsWorked` varchar(65)
+,`PrimaryEmail` varchar(50)
+,`SecondaryEmail` varchar(50)
+,`PhoneNumbers` longtext
+);
 
 -- --------------------------------------------------------
 
@@ -413,6 +612,28 @@ CREATE TABLE `specialty` (
   `specialty` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+--
+-- Dumping data for table `specialty`
+--
+
+INSERT INTO `specialty` (`doctor_id`, `specialty`) VALUES
+(1, 'Internal Medicine'),
+(1, 'Pediatrics'),
+(2, 'Cardiology'),
+(2, 'Neurology'),
+(2, 'Pulmonology'),
+(3, 'Orthopedics'),
+(4, 'Obstetrics and Gynecology'),
+(5, 'Dermatology'),
+(6, 'Endocrinology'),
+(6, 'Gastroenterology'),
+(7, 'Pediatrics'),
+(8, 'Psychiatry'),
+(9, 'Neurology'),
+(10, 'Family Medicine'),
+(10, 'Internal Medicine'),
+(10, 'Pediatrics');
+
 -- --------------------------------------------------------
 
 --
@@ -421,8 +642,99 @@ CREATE TABLE `specialty` (
 
 CREATE TABLE `telephone` (
   `person_id` int(11) NOT NULL,
-  `telephone` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `telephone` varchar(15) NOT NULL
+) ;
+
+--
+-- Dumping data for table `telephone`
+--
+
+INSERT INTO `telephone` (`person_id`, `telephone`) VALUES
+(1, '5853452243'),
+(1, '7318490250'),
+(2, '4281973659'),
+(3, '7840965123'),
+(4, '6194075823'),
+(5, '4978302161'),
+(6, '2175960843'),
+(7, '5612397480'),
+(8, '9184056237'),
+(9, '6803721459'),
+(10, '3609287415'),
+(11, '7401698352'),
+(12, '5038179642'),
+(13, '2916083740'),
+(14, '7901346852'),
+(15, '6102834979'),
+(16, '9302856417'),
+(17, '4671209385'),
+(18, '1398562740'),
+(19, '5201843769'),
+(20, '8215940367'),
+(21, '3195684072'),
+(22, '8701564392'),
+(23, '3570682419'),
+(24, '4957320681'),
+(25, '1584739026'),
+(26, '8740352169'),
+(27, '9720846351'),
+(28, '3205468719'),
+(29, '2189574063'),
+(30, '8407621953');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `current_employee`
+--
+DROP TABLE IF EXISTS `current_employee`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_employee`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `FT` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `P` on(`employee`.`employee_id` = `P`.`person_id`)) WHERE `employee`.`end_date` is null GROUP BY `P`.`last_name`, `employee`.`start_date` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `doctor_info`
+--
+DROP TABLE IF EXISTS `doctor_info`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `doctor_info`  AS SELECT (select concat('Dr. ',`f`.`FullName`) from `full_name` `F` where `f`.`person_id` = `DA`.`doctor_id`) AS `FullName`, group_concat(`S`.`specialty` separator ', ') AS `Specialties`, date_format(`DA`.`availability_date`,'%m/%d/%Y') AS `AvailabilityDate`, concat(date_format(`DA`.`start_time`,'%h:%i %p'),' - ',date_format(`DA`.`end_time`,'%h:%i %p')) AS `AvailabilityTime`, `D`.`primary_email` AS `PrimaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `FT` where `ft`.`person_id` = `DA`.`doctor_id`) AS `TelephoneNumbers` FROM (((`doctor_availability` `DA` join `doctor` `D` on(`D`.`doctor_id` = `DA`.`doctor_id`)) join `person` `P` on(`P`.`person_id` = `D`.`doctor_id`)) join `specialty` `S` on(`S`.`doctor_id` = `D`.`doctor_id`)) GROUP BY `DA`.`availability_id` ORDER BY `P`.`last_name` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `doctor_upcoming_appts`
+--
+DROP TABLE IF EXISTS `doctor_upcoming_appts`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `doctor_upcoming_appts`  AS SELECT `appointment`.`appointment_date` AS `AppointmentDate`, concat(`appointment`.`start_time`,' - ',`appointment`.`end_time`) AS `AppointmentTime`, `appointment`.`location` AS `AppointmentLocation`, (select concat(`person`.`first_name`,' ',`person`.`last_name`) AS `PatientFullName` from `person` where `appointment`.`patient_id` = `person`.`person_id`) AS `Name_exp_4` FROM (`doctor` join `appointment` on(`doctor`.`doctor_id` = `appointment`.`doctor_id`)) WHERE `appointment`.`appointment_date` >= curdate() ORDER BY `appointment`.`appointment_date` ASC, `appointment`.`start_time` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `formatted_telephone`
+--
+DROP TABLE IF EXISTS `formatted_telephone`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `formatted_telephone`  AS SELECT `telephone`.`person_id` AS `person_id`, group_concat('(',substr(`telephone`.`telephone`,1,3),') ',substr(`telephone`.`telephone`,4,3),'-',substr(`telephone`.`telephone`,7) separator ', ') AS `formatted_telephone` FROM `telephone` GROUP BY `telephone`.`person_id` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `full_name`
+--
+DROP TABLE IF EXISTS `full_name`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `full_name`  AS SELECT `P`.`person_id` AS `person_id`, if(`P`.`middle_initial` is null,concat(`P`.`first_name`,' ',`P`.`last_name`),concat(`P`.`first_name`,' ',`P`.`middle_initial`,' ',`P`.`last_name`)) AS `FullName` FROM `person` AS `P` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `message_details`
+--
+DROP TABLE IF EXISTS `message_details`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `message_details`  AS SELECT `message`.`message_id` AS `MessageID`, `message`.`sender_id` AS `SenderID`, (select concat(`person`.`first_name`,' ',`person`.`last_name`) AS `SenderFullName` from `person` where `message`.`sender_id` = `person`.`person_id`) AS `Name_exp_3`, (select `employee`.`primary_email` from `employee` where `message`.`sender_id` = `employee`.`employee_id`) AS `SenderEmail`, (select `telephone`.`telephone` from `telephone` where `message`.`sender_id` = `telephone`.`person_id`) AS `SenderPhoneNumber`, `message`.`title` AS `Title`, `message`.`body` AS `Body` FROM `message` ;
 
 -- --------------------------------------------------------
 
@@ -431,7 +743,43 @@ CREATE TABLE `telephone` (
 --
 DROP TABLE IF EXISTS `minor_status`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `minor_status`  AS SELECT concat(`person`.`first_name`,' ',`person`.`last_name`) AS `name`, `person`.`birth_date` AS `birth_date`, CASE WHEN to_days(curdate()) - to_days(`person`.`birth_date`) < 6570 THEN 'Minor' ELSE 'Adult' END AS `status` FROM `person` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `minor_status`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `person`.`person_id`) AS `Name_exp_1`, `person`.`birth_date` AS `birth_date`, CASE WHEN to_days(curdate()) - to_days(`person`.`birth_date`) < 6570 THEN 'Minor' ELSE 'Adult' END AS `status` FROM `person` ORDER BY `person`.`last_name` ASC, `person`.`birth_date` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `patientinfo`
+--
+DROP TABLE IF EXISTS `patientinfo`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `patientinfo`  AS SELECT concat(`person`.`first_name`,' ',`person`.`middle_intial`,' ',`person`.`last_name`) AS `FullName`, `person`.`birth_date` AS `DateOfBirth`, `telephone`.`telephone` AS `PhoneNumber`, `patient`.`school_email` AS `Email` FROM ((`patient` join `person` on(`patient`.`patient_id` = `person`.`person_id`)) join `telephone` on(`patient`.`patient_id` = `telephone`.`person_id`)) GROUP BY `patient`.`patient_id` ORDER BY `person`.`last_name` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `patient_appointment`
+--
+DROP TABLE IF EXISTS `patient_appointment`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `patient_appointment`  AS SELECT concat(`person`.`first_name`,' ',`person`.`middle_intial`,' ',`person`.`last_name`) AS `FullName`, `person`.`birth_date` AS `DateOfBirth`, `appointment`.`appointment_date` AS `ApptDate`, `appointment`.`start_time` AS `ApptStartTime`, `appointment`.`end_time` AS `ApptEndTime`, `appointment`.`location` AS `ApptLocation`, (select concat('Dr. ',`person`.`last_name`) AS `DrName` from `person` where `person`.`person_id` = `appointment`.`doctor_id`) AS `Name_exp_7` FROM ((`patient` join `person` on(`patient`.`patient_id` = `person`.`person_id`)) join `appointment` on(`patient`.`patient_id` = `appointment`.`patient_id`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `patient_medical_records`
+--
+DROP TABLE IF EXISTS `patient_medical_records`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `patient_medical_records`  AS SELECT concat(`person`.`first_name`,' ',`person`.`middle_intial`,' ',`person`.`last_name`) AS `FullName`, `person`.`birth_date` AS `DateOfBirth`, `immunization`.`name` AS `ImmunizationName`, `immunization`.`immunization_date` AS `DateOfImmunization`, `insurance`.`name` AS `InsuranceName`, `insurance`.`policy_number` AS `InsurancePolicyNumber`, `insurance`.`group_number` AS `InsuranceGroupNumber`, `medication`.`medication_id` AS `MedicationID`, `medication`.`start_date` AS `MedicationStartDate`, `medication`.`end_date` AS `MedicationEndDate` FROM ((((`patient` join `person` on(`patient`.`patient_id` = `person`.`person_id`)) join `immunization` on(`patient`.`patient_id` = `immunization`.`patient_id`)) join `insurance` on(`patient`.`patient_id` = `insurance`.`patient_id`)) join `medication` on(`patient`.`patient_id` = `medication`.`patient_id`)) GROUP BY `patient`.`patient_id` ORDER BY `person`.`last_name` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `prior_employees`
+--
+DROP TABLE IF EXISTS `prior_employees`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prior_employees`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `FT` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `P` on(`employee`.`employee_id` = `P`.`person_id`)) WHERE `employee`.`end_date` is not null GROUP BY `P`.`last_name`, `employee`.`start_date` ;
 
 --
 -- Indexes for dumped tables
