@@ -18,3 +18,5 @@ ALTER TABLE person
 ALTER TABLE employee
 	ADD CONSTRAINT employee_end_date_chk CHECK (start_date < end_date);
 
+ALTER TABLE telephone
+	ADD CONSTRAINT len_number_chk CHECK (LENGTH(telephone) > 9);
