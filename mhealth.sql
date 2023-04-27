@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Apr 27, 2023 at 12:24 AM
--- Server version: 8.0.31
--- PHP Version: 8.0.26
+-- Host: localhost
+-- Generation Time: Apr 27, 2023 at 09:54 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,19 +27,14 @@ SET time_zone = "+00:00";
 -- Table structure for table `appointment`
 --
 
-DROP TABLE IF EXISTS `appointment`;
-CREATE TABLE IF NOT EXISTS `appointment` (
-  `appointment_id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
-  `doctor_id` int NOT NULL,
+CREATE TABLE `appointment` (
+  `appointment_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
   `appointment_date` date NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
-  `location` varchar(10) NOT NULL,
-  PRIMARY KEY (`appointment_id`),
-  UNIQUE KEY `unique_patient_appointment` (`patient_id`,`appointment_date`,`start_time`),
-  KEY `patient_id` (`patient_id`),
-  KEY `doctor_id` (`doctor_id`)
+  `location` varchar(10) NOT NULL
 ) ;
 
 --
@@ -49,14 +44,13 @@ CREATE TABLE IF NOT EXISTS `appointment` (
 INSERT INTO `appointment` (`appointment_id`, `patient_id`, `doctor_id`, `appointment_date`, `start_time`, `end_time`, `location`) VALUES
 (1, 21, 1, '2023-10-02', '10:00:00', '11:00:00', 'in-person'),
 (2, 23, 4, '2023-10-02', '09:00:00', '10:30:00', 'online'),
-(3, 26, 6, '2023-10-06', '10:00:00', '11:00:00', 'in-person'),
+(3, 26, 7, '2023-10-06', '13:00:00', '13:30:00', 'online'),
 (4, 29, 8, '2023-10-04', '14:00:00', '15:00:00', 'online'),
-(5, 30, 10, '2023-10-04', '09:00:00', '11:00:00', 'in-person');
+(5, 30, 2, '2023-10-04', '09:00:00', '10:15:00', 'in-person');
 
 --
 -- Triggers `appointment`
 --
-DROP TRIGGER IF EXISTS `check_doctor_availability_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `check_doctor_availability_trigger_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     IF NOT EXISTS (
@@ -76,7 +70,6 @@ CREATE TRIGGER `check_doctor_availability_trigger_insert` BEFORE INSERT ON `appo
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `check_doctor_availability_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `check_doctor_availability_trigger_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
     IF NOT EXISTS (
@@ -96,7 +89,6 @@ CREATE TRIGGER `check_doctor_availability_trigger_update` BEFORE UPDATE ON `appo
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `prevent_double_booking_insert`;
 DELIMITER $$
 CREATE TRIGGER `prevent_double_booking_insert` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
@@ -113,7 +105,6 @@ CREATE TRIGGER `prevent_double_booking_insert` BEFORE INSERT ON `appointment` FO
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `prevent_double_booking_update`;
 DELIMITER $$
 CREATE TRIGGER `prevent_double_booking_update` BEFORE UPDATE ON `appointment` FOR EACH ROW BEGIN
     DECLARE num_appointments INTEGER;
@@ -134,17 +125,16 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `current_employee`
+-- Stand-in structure for view `current_employee_info`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `current_employee`;
-CREATE TABLE IF NOT EXISTS `current_employee` (
+CREATE TABLE `current_employee_info` (
 `FullName` varchar(103)
 ,`JobTitle` varchar(50)
 ,`YearsWorked` varchar(65)
 ,`PrimaryEmail` varchar(50)
 ,`SecondaryEmail` varchar(50)
-,`PhoneNumbers` mediumtext
+,`PhoneNumbers` longtext
 );
 
 -- --------------------------------------------------------
@@ -153,13 +143,11 @@ CREATE TABLE IF NOT EXISTS `current_employee` (
 -- Table structure for table `doctor`
 --
 
-DROP TABLE IF EXISTS `doctor`;
-CREATE TABLE IF NOT EXISTS `doctor` (
-  `doctor_id` int NOT NULL,
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL,
   `primary_email` varchar(50) NOT NULL,
-  `secondary_email` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`doctor_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  `secondary_email` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `doctor`
@@ -183,15 +171,12 @@ INSERT INTO `doctor` (`doctor_id`, `primary_email`, `secondary_email`) VALUES
 -- Table structure for table `doctor_availability`
 --
 
-DROP TABLE IF EXISTS `doctor_availability`;
-CREATE TABLE IF NOT EXISTS `doctor_availability` (
-  `availability_id` int NOT NULL AUTO_INCREMENT,
-  `doctor_id` int NOT NULL,
+CREATE TABLE `doctor_availability` (
+  `availability_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
   `availability_date` date NOT NULL,
   `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  PRIMARY KEY (`availability_id`),
-  KEY `doctor_id` (`doctor_id`)
+  `end_time` time NOT NULL
 ) ;
 
 --
@@ -233,7 +218,6 @@ INSERT INTO `doctor_availability` (`availability_id`, `doctor_id`, `availability
 --
 -- Triggers `doctor_availability`
 --
-DROP TRIGGER IF EXISTS `prevent_availability_overlap_insert`;
 DELIMITER $$
 CREATE TRIGGER `prevent_availability_overlap_insert` BEFORE INSERT ON `doctor_availability` FOR EACH ROW BEGIN
     DECLARE overlap_count INT;
@@ -250,7 +234,6 @@ CREATE TRIGGER `prevent_availability_overlap_insert` BEFORE INSERT ON `doctor_av
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `prevent_availability_overlap_update`;
 DELIMITER $$
 CREATE TRIGGER `prevent_availability_overlap_update` BEFORE UPDATE ON `doctor_availability` FOR EACH ROW BEGIN
     DECLARE overlap_count INT;
@@ -274,28 +257,13 @@ DELIMITER ;
 -- Stand-in structure for view `doctor_info`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `doctor_info`;
-CREATE TABLE IF NOT EXISTS `doctor_info` (
+CREATE TABLE `doctor_info` (
 `FullName` varchar(107)
-,`Specialties` text
+,`Specialties` mediumtext
 ,`AvailabilityDate` varchar(10)
 ,`AvailabilityTime` varchar(19)
 ,`PrimaryEmail` varchar(50)
-,`TelephoneNumbers` mediumtext
-);
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `doctor_upcoming_appts`
--- (See below for the actual view)
---
-DROP VIEW IF EXISTS `doctor_upcoming_appts`;
-CREATE TABLE IF NOT EXISTS `doctor_upcoming_appts` (
-`AppointmentDate` date
-,`AppointmentTime` varchar(23)
-,`AppointmentLocation` varchar(10)
-,`Name_exp_4` varchar(101)
+,`TelephoneNumbers` longtext
 );
 
 -- --------------------------------------------------------
@@ -304,15 +272,13 @@ CREATE TABLE IF NOT EXISTS `doctor_upcoming_appts` (
 -- Table structure for table `employee`
 --
 
-DROP TABLE IF EXISTS `employee`;
-CREATE TABLE IF NOT EXISTS `employee` (
-  `employee_id` int NOT NULL,
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `job_title` varchar(50) NOT NULL,
   `primary_email` varchar(50) NOT NULL,
-  `secondary_email` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`employee_id`)
+  `secondary_email` varchar(50) DEFAULT NULL
 ) ;
 
 --
@@ -334,7 +300,6 @@ INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `p
 --
 -- Triggers `employee`
 --
-DROP TRIGGER IF EXISTS `employee_date_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `employee_date_trigger_insert` BEFORE INSERT ON `employee` FOR EACH ROW BEGIN
     IF (NEW.start_date NOT BETWEEN 1950-01-01 AND CURDATE()) 
@@ -345,7 +310,6 @@ CREATE TRIGGER `employee_date_trigger_insert` BEFORE INSERT ON `employee` FOR EA
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `employee_date_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `employee_date_trigger_update` BEFORE UPDATE ON `employee` FOR EACH ROW BEGIN
     IF (NEW.start_date BETWEEN '1950-01-01' AND CURDATE()) THEN
@@ -362,10 +326,9 @@ DELIMITER ;
 -- Stand-in structure for view `formatted_telephone`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `formatted_telephone`;
-CREATE TABLE IF NOT EXISTS `formatted_telephone` (
-`person_id` int
-,`formatted_telephone` text
+CREATE TABLE `formatted_telephone` (
+`person_id` int(11)
+,`formatted_telephone` mediumtext
 );
 
 -- --------------------------------------------------------
@@ -374,9 +337,8 @@ CREATE TABLE IF NOT EXISTS `formatted_telephone` (
 -- Stand-in structure for view `full_name`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `full_name`;
-CREATE TABLE IF NOT EXISTS `full_name` (
-`person_id` int
+CREATE TABLE `full_name` (
+`person_id` int(11)
 ,`FullName` varchar(103)
 );
 
@@ -386,20 +348,32 @@ CREATE TABLE IF NOT EXISTS `full_name` (
 -- Table structure for table `immunization`
 --
 
-DROP TABLE IF EXISTS `immunization`;
-CREATE TABLE IF NOT EXISTS `immunization` (
-  `immunization_id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int DEFAULT NULL,
-  `name` varchar(50) DEFAULT NULL,
-  `immunization_date` date DEFAULT NULL,
-  PRIMARY KEY (`immunization_id`),
-  KEY `patient_id` (`patient_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `immunization` (
+  `immunization_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `vaccine_name` varchar(50) NOT NULL,
+  `immunization_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `immunization`
+--
+
+INSERT INTO `immunization` (`immunization_id`, `patient_id`, `vaccine_name`, `immunization_date`) VALUES
+(1, 21, 'Flu', '2022-01-05'),
+(2, 22, 'HPV', '2022-02-12'),
+(3, 23, 'MMR', '2022-03-17'),
+(4, 21, 'Chickenpox', '2022-04-23'),
+(5, 25, 'DTaP', '2022-05-29'),
+(6, 26, 'Shingles', '2022-06-08'),
+(7, 27, 'Hepatitis B', '2022-07-13'),
+(8, 28, 'Tetanus', '2022-08-19'),
+(9, 29, 'Measles', '2022-09-24'),
+(10, 30, 'Pneumococcal', '2022-10-31');
 
 --
 -- Triggers `immunization`
 --
-DROP TRIGGER IF EXISTS `immunization_date_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `immunization_date_trigger_insert` BEFORE INSERT ON `immunization` FOR EACH ROW BEGIN
     IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
@@ -409,7 +383,6 @@ CREATE TRIGGER `immunization_date_trigger_insert` BEFORE INSERT ON `immunization
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `immunization_date_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `immunization_date_trigger_update` BEFORE UPDATE ON `immunization` FOR EACH ROW BEGIN
     IF NEW.immunization_date < '1950-01-01' OR NEW.immunization_date > CURDATE() THEN
@@ -426,19 +399,31 @@ DELIMITER ;
 -- Table structure for table `insurance`
 --
 
-DROP TABLE IF EXISTS `insurance`;
-CREATE TABLE IF NOT EXISTS `insurance` (
-  `insurance_id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int DEFAULT NULL,
+CREATE TABLE `insurance` (
+  `insurance_id` int(11) NOT NULL,
+  `patient_id` int(11) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `policy_number` varchar(20) NOT NULL,
-  `group_number` varchar(20) NOT NULL,
-  PRIMARY KEY (`insurance_id`),
-  UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
-  UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
-  UNIQUE KEY `policy_number_2` (`policy_number`,`group_number`),
-  KEY `patient_id` (`patient_id`)
+  `group_number` varchar(20) DEFAULT NULL
 ) ;
+
+--
+-- Dumping data for table `insurance`
+--
+
+INSERT INTO `insurance` (`insurance_id`, `patient_id`, `name`, `policy_number`, `group_number`) VALUES
+(1, 21, 'Blue Cross', 'ABC123456', '4010780417'),
+(2, 22, 'Aetna', 'DEF456789', '5891084200'),
+(3, 23, 'United Healthcare', 'GHI7890123', '9743304183'),
+(4, 24, 'Cigna', 'JKL0123456', ''),
+(5, 25, 'Anthem', 'PQR3456789', '4408733983'),
+(6, 26, 'Kaiser Permanente', 'STU6789012', ''),
+(7, 27, 'Humana', 'VWX9012345', '5656459933'),
+(8, 28, 'Molina Healthcare', 'YZABCD6789', '5191545171'),
+(9, 29, 'Ambetter', 'FGH1234567', '2216298924'),
+(10, 30, 'Medicaid', 'IJK4567890', '01234567890'),
+(11, 21, 'United Healthcare', 'MNO2345678', ''),
+(12, 22, 'American Family', 'PQR3456789', '8251080118');
 
 -- --------------------------------------------------------
 
@@ -446,33 +431,45 @@ CREATE TABLE IF NOT EXISTS `insurance` (
 -- Table structure for table `medication`
 --
 
-DROP TABLE IF EXISTS `medication`;
-CREATE TABLE IF NOT EXISTS `medication` (
-  `medication_id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
+CREATE TABLE `medication` (
+  `medication_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `medication_name` varchar(50) NOT NULL,
   `start_date` date NOT NULL,
-  `end_date` date DEFAULT NULL,
-  PRIMARY KEY (`medication_id`),
-  KEY `patient_id` (`patient_id`)
+  `end_date` date DEFAULT NULL
 ) ;
+
+--
+-- Dumping data for table `medication`
+--
+
+INSERT INTO `medication` (`medication_id`, `patient_id`, `medication_name`, `start_date`, `end_date`) VALUES
+(1, 21, 'Aspirin', '2023-04-01', '2023-04-10'),
+(2, 22, 'Larin', '2019-05-03', NULL),
+(3, 23, 'Acetaminophen', '2023-04-05', '2023-04-12'),
+(4, 22, 'Ranitidine', '2023-01-01', '2023-01-11'),
+(5, 25, 'Diphenhydramine', '2022-08-09', NULL),
+(6, 22, 'Aspirin', '2023-04-10', '2023-05-17'),
+(7, 27, 'Ibuprofen', '2023-02-12', '2023-05-18'),
+(8, 24, 'Acetaminophen', '2023-03-14', '2023-04-21'),
+(9, 26, 'Adderall', '2018-05-22', NULL),
+(10, 26, 'Sertraline', '2021-05-16', NULL);
 
 --
 -- Triggers `medication`
 --
-DROP TRIGGER IF EXISTS `medication_date_trigger_insert`;
 DELIMITER $$
 CREATE TRIGGER `medication_date_trigger_insert` BEFORE INSERT ON `medication` FOR EACH ROW BEGIN
-    IF (NEW.start_date BETWEEN '1950-01-01' AND CURDATE()) THEN
+    IF (NEW.start_date NOT BETWEEN '1950-01-01' AND CURDATE()) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Invalid start date. Only dates between January 1950 and the current date are allowed.';
     END IF;
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `medication_date_trigger_update`;
 DELIMITER $$
 CREATE TRIGGER `medication_date_trigger_update` BEFORE UPDATE ON `medication` FOR EACH ROW BEGIN
-    IF (NEW.start_date BETWEEN '1950-01-01' AND CURDATE()) THEN
+    IF (NEW.start_date NOT BETWEEN '1950-01-01' AND CURDATE()) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Invalid start date. Only dates between January 1950 and the current date are allowed.';
     END IF;
@@ -486,31 +483,35 @@ DELIMITER ;
 -- Table structure for table `message`
 --
 
-DROP TABLE IF EXISTS `message`;
-CREATE TABLE IF NOT EXISTS `message` (
-  `message_id` int NOT NULL AUTO_INCREMENT,
-  `sender_id` int NOT NULL,
-  `receiver_id` int NOT NULL,
+CREATE TABLE `message` (
+  `message_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
   `title` varchar(50) DEFAULT NULL,
-  `body` text NOT NULL,
-  PRIMARY KEY (`message_id`),
-  KEY `sender_id` (`sender_id`),
-  KEY `receiver_id` (`receiver_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  `body` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `message`
+--
+
+INSERT INTO `message` (`message_id`, `sender_id`, `receiver_id`, `title`, `body`) VALUES
+(1, 12, 21, 'Appointment Reminder', 'Hello! This is just a reminder that you have an upcoming appointment with your doctor on May 5th at 10am. Please remember to arrive 10-15 minutes early to check in. Thank you!'),
+(2, 20, 22, 'Prescription Refill Remminder', 'Hello! This message is to remind you to refill your prescription for Lauren. Please let us know if you have any questions or concerns. Thank you!'),
+(3, 12, 23, 'Lab Results', 'Hello! Your recent lab results are in. Your cholesterol is 230mg/dL, which is elevated. Please schedule a follow-up appointment with your doctor to discuss further. Thank you!'),
+(4, 20, 24, 'Appointment Cancellation', 'Hello! We received your request to cancel your appointment on May 5th at 10am. If you would like to reschedule, please let us know. Thank you!'),
+(5, 12, 25, 'Wellness Check Reminder', 'Hello! This is just a friendly reminder to schedule your annual wellness check. This is an important part of maintaining your overall health and well-being. Please call us to schedule an appointment at your earliest convenience. Thank you!');
 
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `message_details`
+-- Stand-in structure for view `messages`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `message_details`;
-CREATE TABLE IF NOT EXISTS `message_details` (
-`MessageID` int
-,`SenderID` int
-,`Name_exp_3` varchar(101)
-,`SenderEmail` varchar(50)
-,`SenderPhoneNumber` varchar(15)
+CREATE TABLE `messages` (
+`MessageID` int(11)
+,`SenderName` varchar(103)
+,`SenderJobTitle` varchar(50)
 ,`Title` varchar(50)
 ,`Body` text
 );
@@ -518,14 +519,13 @@ CREATE TABLE IF NOT EXISTS `message_details` (
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `minor_status`
+-- Stand-in structure for view `minor_stats`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `minor_status`;
-CREATE TABLE IF NOT EXISTS `minor_status` (
-`Name_exp_1` varchar(103)
-,`birth_date` date
-,`status` varchar(5)
+CREATE TABLE `minor_stats` (
+`FullName` varchar(103)
+,`BirthDate` date
+,`Status` varchar(5)
 );
 
 -- --------------------------------------------------------
@@ -534,13 +534,11 @@ CREATE TABLE IF NOT EXISTS `minor_status` (
 -- Table structure for table `patient`
 --
 
-DROP TABLE IF EXISTS `patient`;
-CREATE TABLE IF NOT EXISTS `patient` (
-  `patient_id` int NOT NULL,
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL,
   `password_hash` binary(64) NOT NULL,
-  `school_email` varchar(50) NOT NULL,
-  PRIMARY KEY (`patient_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  `school_email` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `patient`
@@ -561,17 +559,43 @@ INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `patient_info`
+-- (See below for the actual view)
+--
+CREATE TABLE `patient_info` (
+`Name` varchar(103)
+,`DateOfBirth` date
+,`InsuranceName(s)` mediumtext
+,`PolicyNumber(s)` mediumtext
+,`GroupNumber(s)` mediumtext
+,`PhoneNumber` longtext
+,`Email` varchar(50)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `patient_vaccination`
+-- (See below for the actual view)
+--
+CREATE TABLE `patient_vaccination` (
+`Name` varchar(103)
+,`ImmunizationName` varchar(50)
+,`DateOfImmunization` date
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `person`
 --
 
-DROP TABLE IF EXISTS `person`;
-CREATE TABLE IF NOT EXISTS `person` (
-  `person_id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `person` (
+  `person_id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `middle_initial` char(1) DEFAULT NULL,
   `last_name` varchar(50) NOT NULL,
-  `birth_date` date NOT NULL,
-  PRIMARY KEY (`person_id`)
+  `birth_date` date NOT NULL
 ) ;
 
 --
@@ -613,17 +637,16 @@ INSERT INTO `person` (`person_id`, `first_name`, `middle_initial`, `last_name`, 
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `prior_employees`
+-- Stand-in structure for view `prior_employee_info`
 -- (See below for the actual view)
 --
-DROP VIEW IF EXISTS `prior_employees`;
-CREATE TABLE IF NOT EXISTS `prior_employees` (
+CREATE TABLE `prior_employee_info` (
 `FullName` varchar(103)
 ,`JobTitle` varchar(50)
 ,`YearsWorked` varchar(65)
 ,`PrimaryEmail` varchar(50)
 ,`SecondaryEmail` varchar(50)
-,`PhoneNumbers` mediumtext
+,`PhoneNumbers` longtext
 );
 
 -- --------------------------------------------------------
@@ -632,12 +655,10 @@ CREATE TABLE IF NOT EXISTS `prior_employees` (
 -- Table structure for table `specialty`
 --
 
-DROP TABLE IF EXISTS `specialty`;
-CREATE TABLE IF NOT EXISTS `specialty` (
-  `doctor_id` int NOT NULL,
-  `specialty` varchar(50) NOT NULL,
-  PRIMARY KEY (`doctor_id`,`specialty`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `specialty` (
+  `doctor_id` int(11) NOT NULL,
+  `specialty` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `specialty`
@@ -667,11 +688,9 @@ INSERT INTO `specialty` (`doctor_id`, `specialty`) VALUES
 -- Table structure for table `telephone`
 --
 
-DROP TABLE IF EXISTS `telephone`;
-CREATE TABLE IF NOT EXISTS `telephone` (
-  `person_id` int NOT NULL,
-  `telephone` varchar(15) NOT NULL,
-  PRIMARY KEY (`person_id`,`telephone`)
+CREATE TABLE `telephone` (
+  `person_id` int(11) NOT NULL,
+  `telephone` varchar(15) NOT NULL
 ) ;
 
 --
@@ -714,12 +733,25 @@ INSERT INTO `telephone` (`person_id`, `telephone`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure for view `current_employee`
+-- Stand-in structure for view `upcoming_appts`
+-- (See below for the actual view)
 --
-DROP TABLE IF EXISTS `current_employee`;
+CREATE TABLE `upcoming_appts` (
+`DoctorName` varchar(103)
+,`PatientName` varchar(103)
+,`AppointmentDate` date
+,`AppointmentTime` varchar(19)
+,`Location` varchar(10)
+);
 
-DROP VIEW IF EXISTS `current_employee`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_employee`  AS SELECT (select `f`.`FullName` from `full_name` `f` where (`f`.`person_id` = `employee`.`employee_id`)) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',(timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) % 12),' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where (`ft`.`person_id` = `employee`.`employee_id`)) AS `PhoneNumbers` FROM (`employee` join `person` `p` on((`employee`.`employee_id` = `p`.`person_id`))) WHERE (`employee`.`end_date` is null) GROUP BY `p`.`last_name`, `employee`.`start_date``start_date`  ;
+-- --------------------------------------------------------
+
+--
+-- Structure for view `current_employee_info`
+--
+DROP TABLE IF EXISTS `current_employee_info`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,curdate()),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,curdate()) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is null ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
 
 -- --------------------------------------------------------
 
@@ -728,18 +760,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `doctor_info`;
 
-DROP VIEW IF EXISTS `doctor_info`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `doctor_info`  AS SELECT (select concat('Dr. ',`f`.`FullName`) from `full_name` `f` where (`f`.`person_id` = `da`.`doctor_id`)) AS `FullName`, group_concat(`s`.`specialty` separator ', ') AS `Specialties`, date_format(`da`.`availability_date`,'%m/%d/%Y') AS `AvailabilityDate`, concat(date_format(`da`.`start_time`,'%h:%i %p'),' - ',date_format(`da`.`end_time`,'%h:%i %p')) AS `AvailabilityTime`, `d`.`primary_email` AS `PrimaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where (`ft`.`person_id` = `da`.`doctor_id`)) AS `TelephoneNumbers` FROM (((`doctor_availability` `da` join `doctor` `d` on((`d`.`doctor_id` = `da`.`doctor_id`))) join `person` `p` on((`p`.`person_id` = `d`.`doctor_id`))) join `specialty` `s` on((`s`.`doctor_id` = `d`.`doctor_id`))) GROUP BY `da`.`availability_id` ORDER BY `p`.`last_name` ASC  ;
-
--- --------------------------------------------------------
-
---
--- Structure for view `doctor_upcoming_appts`
---
-DROP TABLE IF EXISTS `doctor_upcoming_appts`;
-
-DROP VIEW IF EXISTS `doctor_upcoming_appts`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `doctor_upcoming_appts`  AS SELECT `appointment`.`appointment_date` AS `AppointmentDate`, concat(`appointment`.`start_time`,' - ',`appointment`.`end_time`) AS `AppointmentTime`, `appointment`.`location` AS `AppointmentLocation`, (select concat(`person`.`first_name`,' ',`person`.`last_name`) AS `PatientFullName` from `person` where (`appointment`.`patient_id` = `person`.`person_id`)) AS `Name_exp_4` FROM (`doctor` join `appointment` on((`doctor`.`doctor_id` = `appointment`.`doctor_id`))) WHERE (`appointment`.`appointment_date` >= curdate()) ORDER BY `appointment`.`appointment_date` ASC, `appointment`.`start_time` ASC  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `doctor_info`  AS SELECT (select concat('Dr. ',`f`.`FullName`) from `full_name` `F` where `f`.`person_id` = `DA`.`doctor_id`) AS `FullName`, group_concat(`S`.`specialty` separator ', ') AS `Specialties`, date_format(`DA`.`availability_date`,'%m/%d/%Y') AS `AvailabilityDate`, concat(date_format(`DA`.`start_time`,'%h:%i %p'),' - ',date_format(`DA`.`end_time`,'%h:%i %p')) AS `AvailabilityTime`, `D`.`primary_email` AS `PrimaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `FT` where `ft`.`person_id` = `DA`.`doctor_id`) AS `TelephoneNumbers` FROM (((`doctor_availability` `DA` join `doctor` `D` on(`D`.`doctor_id` = `DA`.`doctor_id`)) join `person` `P` on(`P`.`person_id` = `D`.`doctor_id`)) join `specialty` `S` on(`S`.`doctor_id` = `D`.`doctor_id`)) GROUP BY `DA`.`availability_id` ORDER BY `P`.`last_name` ASC ;
 
 -- --------------------------------------------------------
 
@@ -748,8 +769,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `formatted_telephone`;
 
-DROP VIEW IF EXISTS `formatted_telephone`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `formatted_telephone`  AS SELECT `telephone`.`person_id` AS `person_id`, group_concat('(',substr(`telephone`.`telephone`,1,3),') ',substr(`telephone`.`telephone`,4,3),'-',substr(`telephone`.`telephone`,7) separator ', ') AS `formatted_telephone` FROM `telephone` GROUP BY `telephone`.`person_id``person_id`  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `formatted_telephone`  AS SELECT `telephone`.`person_id` AS `person_id`, group_concat('(',substr(`telephone`.`telephone`,1,3),') ',substr(`telephone`.`telephone`,4,3),'-',substr(`telephone`.`telephone`,7) separator ', ') AS `formatted_telephone` FROM `telephone` GROUP BY `telephone`.`person_id` ;
 
 -- --------------------------------------------------------
 
@@ -758,38 +778,195 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `full_name`;
 
-DROP VIEW IF EXISTS `full_name`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `full_name`  AS SELECT `p`.`person_id` AS `person_id`, if((`p`.`middle_initial` is null),concat(`p`.`first_name`,' ',`p`.`last_name`),concat(`p`.`first_name`,' ',`p`.`middle_initial`,' ',`p`.`last_name`)) AS `FullName` FROM `person` AS `p``p`  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `full_name`  AS SELECT `P`.`person_id` AS `person_id`, if(`P`.`middle_initial` is null,concat(`P`.`first_name`,' ',`P`.`last_name`),concat(`P`.`first_name`,' ',`P`.`middle_initial`,' ',`P`.`last_name`)) AS `FullName` FROM `person` AS `P` ;
 
 -- --------------------------------------------------------
 
 --
--- Structure for view `message_details`
+-- Structure for view `messages`
 --
-DROP TABLE IF EXISTS `message_details`;
+DROP TABLE IF EXISTS `messages`;
 
-DROP VIEW IF EXISTS `message_details`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `message_details`  AS SELECT `message`.`message_id` AS `MessageID`, `message`.`sender_id` AS `SenderID`, (select concat(`person`.`first_name`,' ',`person`.`last_name`) AS `SenderFullName` from `person` where (`message`.`sender_id` = `person`.`person_id`)) AS `Name_exp_3`, (select `employee`.`primary_email` from `employee` where (`message`.`sender_id` = `employee`.`employee_id`)) AS `SenderEmail`, (select `telephone`.`telephone` from `telephone` where (`message`.`sender_id` = `telephone`.`person_id`)) AS `SenderPhoneNumber`, `message`.`title` AS `Title`, `message`.`body` AS `Body` FROM `message``message`  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `messages`  AS SELECT `message`.`message_id` AS `MessageID`, (select `fn`.`FullName` from `full_name` `FN` where `fn`.`person_id` = `message`.`sender_id`) AS `SenderName`, `E`.`job_title` AS `SenderJobTitle`, `message`.`title` AS `Title`, `message`.`body` AS `Body` FROM (`message` join `employee` `E` on(`E`.`employee_id` = `message`.`sender_id`)) ;
 
 -- --------------------------------------------------------
 
 --
--- Structure for view `minor_status`
+-- Structure for view `minor_stats`
 --
-DROP TABLE IF EXISTS `minor_status`;
+DROP TABLE IF EXISTS `minor_stats`;
 
-DROP VIEW IF EXISTS `minor_status`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `minor_status`  AS SELECT (select `f`.`FullName` from `full_name` `f` where (`f`.`person_id` = `person`.`person_id`)) AS `Name_exp_1`, `person`.`birth_date` AS `birth_date`, (case when ((to_days(curdate()) - to_days(`person`.`birth_date`)) < 6570) then 'Minor' else 'Adult' end) AS `status` FROM `person` ORDER BY `person`.`last_name` ASC, `person`.`birth_date` ASC  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `minor_stats`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `person`.`person_id`) AS `FullName`, `person`.`birth_date` AS `BirthDate`, CASE WHEN to_days(curdate()) - to_days(`person`.`birth_date`) < 6570 THEN 'Minor' ELSE 'Adult' END AS `Status` FROM `person` ORDER BY `person`.`last_name` ASC, `person`.`birth_date` ASC ;
 
 -- --------------------------------------------------------
 
 --
--- Structure for view `prior_employees`
+-- Structure for view `patient_info`
 --
-DROP TABLE IF EXISTS `prior_employees`;
+DROP TABLE IF EXISTS `patient_info`;
 
-DROP VIEW IF EXISTS `prior_employees`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prior_employees`  AS SELECT (select `f`.`FullName` from `full_name` `f` where (`f`.`person_id` = `employee`.`employee_id`)) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',(timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) % 12),' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where (`ft`.`person_id` = `employee`.`employee_id`)) AS `PhoneNumbers` FROM (`employee` join `person` `p` on((`employee`.`employee_id` = `p`.`person_id`))) WHERE (`employee`.`end_date` is not null) GROUP BY `p`.`last_name`, `employee`.`start_date``start_date`  ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `patient_info`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `patient`.`patient_id`) AS `Name`, `person`.`birth_date` AS `DateOfBirth`, group_concat(`insurance`.`name` separator ', ') AS `InsuranceName(s)`, group_concat(`insurance`.`policy_number` separator ', ') AS `PolicyNumber(s)`, group_concat(`insurance`.`group_number` separator ', ') AS `GroupNumber(s)`, (select `formatted_telephone`.`formatted_telephone` from `formatted_telephone` where `formatted_telephone`.`person_id` = `patient`.`patient_id`) AS `PhoneNumber`, `patient`.`school_email` AS `Email` FROM (((`patient` join `person` on(`patient`.`patient_id` = `person`.`person_id`)) join `telephone` on(`patient`.`patient_id` = `telephone`.`person_id`)) join `insurance` on(`insurance`.`patient_id` = `patient`.`patient_id`)) GROUP BY `patient`.`patient_id` ORDER BY `person`.`last_name` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `patient_vaccination`
+--
+DROP TABLE IF EXISTS `patient_vaccination`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `patient_vaccination`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `immunization`.`patient_id`) AS `Name`, `immunization`.`vaccine_name` AS `ImmunizationName`, `immunization`.`immunization_date` AS `DateOfImmunization` FROM (`immunization` join `person` on(`person`.`person_id` = `immunization`.`patient_id`)) GROUP BY `immunization`.`immunization_id` ORDER BY `person`.`last_name` ASC, `person`.`birth_date` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `prior_employee_info`
+--
+DROP TABLE IF EXISTS `prior_employee_info`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prior_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is not null ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `upcoming_appts`
+--
+DROP TABLE IF EXISTS `upcoming_appts`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `upcoming_appts`  AS SELECT (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `appointment`.`doctor_id`) AS `DoctorName`, (select `f`.`FullName` from `full_name` `F` where `f`.`person_id` = `appointment`.`patient_id`) AS `PatientName`, `appointment`.`appointment_date` AS `AppointmentDate`, concat((select date_format(`appointment`.`start_time`,'%h:%i %p')),' - ',(select date_format(`appointment`.`end_time`,'%h:%i %p'))) AS `AppointmentTime`, `appointment`.`location` AS `Location` FROM (`appointment` join `person` on(`person`.`person_id` = `appointment`.`doctor_id`)) WHERE `appointment`.`appointment_date` >= curdate() ORDER BY `appointment`.`appointment_date` ASC, `appointment`.`start_time` ASC, `person`.`last_name` ASC ;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `appointment`
+--
+ALTER TABLE `appointment`
+  ADD PRIMARY KEY (`appointment_id`),
+  ADD UNIQUE KEY `unique_patient_appointment` (`patient_id`,`appointment_date`,`start_time`),
+  ADD KEY `patient_id` (`patient_id`),
+  ADD KEY `doctor_id` (`doctor_id`);
+
+--
+-- Indexes for table `doctor`
+--
+ALTER TABLE `doctor`
+  ADD PRIMARY KEY (`doctor_id`);
+
+--
+-- Indexes for table `doctor_availability`
+--
+ALTER TABLE `doctor_availability`
+  ADD PRIMARY KEY (`availability_id`),
+  ADD KEY `doctor_id` (`doctor_id`);
+
+--
+-- Indexes for table `employee`
+--
+ALTER TABLE `employee`
+  ADD PRIMARY KEY (`employee_id`);
+
+--
+-- Indexes for table `immunization`
+--
+ALTER TABLE `immunization`
+  ADD PRIMARY KEY (`immunization_id`),
+  ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `insurance`
+--
+ALTER TABLE `insurance`
+  ADD PRIMARY KEY (`insurance_id`),
+  ADD UNIQUE KEY `policy_number` (`policy_number`,`group_number`),
+  ADD UNIQUE KEY `unique_insurance` (`policy_number`,`group_number`),
+  ADD UNIQUE KEY `policy_number_2` (`policy_number`,`group_number`),
+  ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `medication`
+--
+ALTER TABLE `medication`
+  ADD PRIMARY KEY (`medication_id`),
+  ADD KEY `patient_id` (`patient_id`);
+
+--
+-- Indexes for table `message`
+--
+ALTER TABLE `message`
+  ADD PRIMARY KEY (`message_id`),
+  ADD KEY `sender_id` (`sender_id`),
+  ADD KEY `receiver_id` (`receiver_id`);
+
+--
+-- Indexes for table `patient`
+--
+ALTER TABLE `patient`
+  ADD PRIMARY KEY (`patient_id`);
+
+--
+-- Indexes for table `person`
+--
+ALTER TABLE `person`
+  ADD PRIMARY KEY (`person_id`);
+
+--
+-- Indexes for table `specialty`
+--
+ALTER TABLE `specialty`
+  ADD PRIMARY KEY (`doctor_id`,`specialty`);
+
+--
+-- Indexes for table `telephone`
+--
+ALTER TABLE `telephone`
+  ADD PRIMARY KEY (`person_id`,`telephone`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `appointment`
+--
+ALTER TABLE `appointment`
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `doctor_availability`
+--
+ALTER TABLE `doctor_availability`
+  MODIFY `availability_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `immunization`
+--
+ALTER TABLE `immunization`
+  MODIFY `immunization_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `insurance`
+--
+ALTER TABLE `insurance`
+  MODIFY `insurance_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medication`
+--
+ALTER TABLE `medication`
+  MODIFY `medication_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `message`
+--
+ALTER TABLE `message`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `person`
+--
+ALTER TABLE `person`
+  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
