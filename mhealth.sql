@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 27, 2023 at 09:54 AM
+-- Generation Time: May 07, 2023 at 04:25 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -132,7 +132,7 @@ CREATE TABLE `current_employee_info` (
 `FullName` varchar(103)
 ,`JobTitle` varchar(50)
 ,`YearsWorked` varchar(65)
-,`PrimaryEmail` varchar(50)
+,`EmployeeEmail` varchar(50)
 ,`SecondaryEmail` varchar(50)
 ,`PhoneNumbers` longtext
 );
@@ -277,7 +277,7 @@ CREATE TABLE `employee` (
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `job_title` varchar(50) NOT NULL,
-  `primary_email` varchar(50) NOT NULL,
+  `employee_email` varchar(50) NOT NULL,
   `secondary_email` varchar(50) DEFAULT NULL
 ) ;
 
@@ -285,7 +285,7 @@ CREATE TABLE `employee` (
 -- Dumping data for table `employee`
 --
 
-INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `primary_email`, `secondary_email`) VALUES
+INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `employee_email`, `secondary_email`) VALUES
 (11, '1990-05-11', '1991-11-30', 'Nurse', 'nurse11@example.com', 'nurse11_secondary@example.com'),
 (12, '2018-07-01', NULL, 'Receptionist', 'receptionist12@example.com', NULL),
 (13, '2020-02-15', NULL, 'Medical Assistant', 'assistant13@example.com', 'assistant13_secondary@example.com'),
@@ -302,10 +302,10 @@ INSERT INTO `employee` (`employee_id`, `start_date`, `end_date`, `job_title`, `p
 --
 DELIMITER $$
 CREATE TRIGGER `employee_date_trigger_insert` BEFORE INSERT ON `employee` FOR EACH ROW BEGIN
-    IF (NEW.start_date NOT BETWEEN 1950-01-01 AND CURDATE()) 
+    IF (NEW.start_date NOT BETWEEN 1950-01-01 AND CURDATE() OR NEW.end_date > CURDATE()) 
   THEN
         SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Invalid start or end date.';
+        SET MESSAGE_TEXT = 'Invalid start date.';
     END IF;
 END
 $$
@@ -402,7 +402,7 @@ DELIMITER ;
 CREATE TABLE `insurance` (
   `insurance_id` int(11) NOT NULL,
   `patient_id` int(11) DEFAULT NULL,
-  `name` varchar(50) DEFAULT NULL,
+  `insurance_name` varchar(50) DEFAULT NULL,
   `policy_number` varchar(20) NOT NULL,
   `group_number` varchar(20) DEFAULT NULL
 ) ;
@@ -411,7 +411,7 @@ CREATE TABLE `insurance` (
 -- Dumping data for table `insurance`
 --
 
-INSERT INTO `insurance` (`insurance_id`, `patient_id`, `name`, `policy_number`, `group_number`) VALUES
+INSERT INTO `insurance` (`insurance_id`, `patient_id`, `insurance_name`, `policy_number`, `group_number`) VALUES
 (1, 21, 'Blue Cross', 'ABC123456', '4010780417'),
 (2, 22, 'Aetna', 'DEF456789', '5891084200'),
 (3, 23, 'United Healthcare', 'GHI7890123', '9743304183'),
@@ -563,13 +563,6 @@ INSERT INTO `patient` (`patient_id`, `password_hash`, `school_email`) VALUES
 -- (See below for the actual view)
 --
 CREATE TABLE `patient_info` (
-`Name` varchar(103)
-,`DateOfBirth` date
-,`InsuranceName(s)` mediumtext
-,`PolicyNumber(s)` mediumtext
-,`GroupNumber(s)` mediumtext
-,`PhoneNumber` longtext
-,`Email` varchar(50)
 );
 
 -- --------------------------------------------------------
@@ -644,7 +637,7 @@ CREATE TABLE `prior_employee_info` (
 `FullName` varchar(103)
 ,`JobTitle` varchar(50)
 ,`YearsWorked` varchar(65)
-,`PrimaryEmail` varchar(50)
+,`EmployeeEmail` varchar(50)
 ,`SecondaryEmail` varchar(50)
 ,`PhoneNumbers` longtext
 );
@@ -751,7 +744,7 @@ CREATE TABLE `upcoming_appts` (
 --
 DROP TABLE IF EXISTS `current_employee_info`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,curdate()),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,curdate()) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is null ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,curdate()),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,curdate()) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`employee_email` AS `EmployeeEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is null OR `employee`.`end_date` > curdate() ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
 
 -- --------------------------------------------------------
 
@@ -787,7 +780,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `messages`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `messages`  AS SELECT `message`.`message_id` AS `MessageID`, (select `fn`.`FullName` from `full_name` `FN` where `fn`.`person_id` = `message`.`sender_id`) AS `SenderName`, `E`.`job_title` AS `SenderJobTitle`, `message`.`title` AS `Title`, `message`.`body` AS `Body` FROM (`message` join `employee` `E` on(`E`.`employee_id` = `message`.`sender_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `messages`  AS SELECT `message`.`message_id` AS `MessageID`, (select `fn`.`FullName` from `full_name` `FN` where `fn`.`person_id` = `message`.`sender_id`) AS `SenderName`, `E`.`job_title` AS `SenderJobTitle`, `message`.`title` AS `Title`, `message`.`body` AS `Body` FROM (`message` join `employee` `E` on(`E`.`employee_id` = `message`.`sender_id`)) ORDER BY `message`.`message_id` ASC ;
 
 -- --------------------------------------------------------
 
@@ -823,7 +816,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `prior_employee_info`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prior_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`primary_email` AS `PrimaryEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is not null ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `prior_employee_info`  AS SELECT (select `f`.`FullName` from `full_name` `f` where `f`.`person_id` = `employee`.`employee_id`) AS `FullName`, `employee`.`job_title` AS `JobTitle`, concat(timestampdiff(YEAR,`employee`.`start_date`,`employee`.`end_date`),' year(s) and ',timestampdiff(MONTH,`employee`.`start_date`,`employee`.`end_date`) MOD 12,' months(s)') AS `YearsWorked`, `employee`.`employee_email` AS `EmployeeEmail`, `employee`.`secondary_email` AS `SecondaryEmail`, (select `ft`.`formatted_telephone` from `formatted_telephone` `ft` where `ft`.`person_id` = `employee`.`employee_id`) AS `PhoneNumbers` FROM (`employee` join `person` `p` on(`p`.`person_id` = `employee`.`employee_id`)) WHERE `employee`.`end_date` is not null AND `employee`.`end_date` < curdate() ORDER BY `p`.`last_name` ASC, `employee`.`start_date` ASC ;
 
 -- --------------------------------------------------------
 
@@ -895,6 +888,7 @@ ALTER TABLE `medication`
 --
 ALTER TABLE `message`
   ADD PRIMARY KEY (`message_id`),
+  ADD UNIQUE KEY `sender_id_2` (`sender_id`,`receiver_id`),
   ADD KEY `sender_id` (`sender_id`),
   ADD KEY `receiver_id` (`receiver_id`);
 
